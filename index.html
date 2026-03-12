@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DEOBSF · Military Grade Deobfuscator</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
+body{background:#e0e5ec;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 20px 0;}
+.neo-card{background:#eef0f4;width:100%;max-width:520px;border-radius:50px;padding:35px 30px;box-shadow:20px 20px 35px #b8b9be,-20px -20px 35px #ffffff;position:relative;z-index:2;margin-bottom:20px;}
+.logo-wrapper{display:flex;justify-content:center;margin-bottom:15px;}
+.logo-icon{width:110px;height:110px;border-radius:50%;background:#eef0f4;box-shadow:8px 8px 15px #b8b9be,-8px -8px 15px #ffffff;display:flex;align-items:center;justify-content:center;font-size:46px;color:#2d4059;}
+.title-main{font-weight:800;font-size:26px;text-align:center;color:#2d4059;letter-spacing:1px;margin-bottom:5px;text-shadow:2px 2px 4px #ffffff80;}
+.sub-title{text-align:center;font-size:12px;font-weight:600;color:#4a5c72;letter-spacing:1.5px;margin-bottom:20px;text-transform:uppercase;}
+.detection-badge{display:none;background:#d4dae3;border-radius:30px;padding:12px 18px;margin-bottom:18px;box-shadow:inset 4px 4px 8px #b8b9be,inset -4px -4px 8px #ffffff;font-size:12px;font-weight:700;color:#1e3b4f;word-break:break-word;line-height:1.9;}
+.detection-badge.visible{display:block;}
+.badge-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#4a5c72;display:block;margin-bottom:6px;}
+.layer-tag{display:inline-block;background:#4a90e2;color:white;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;margin:2px 3px;text-transform:uppercase;}
+.clean-tag{background:#2e7d32;}
+.input-group{margin-bottom:20px;}
+.label-text{display:block;font-weight:700;font-size:11px;color:#4a5c72;margin-bottom:8px;letter-spacing:0.8px;text-transform:uppercase;padding-left:10px;}
+.input-field{width:100%;padding:16px 20px;background:#eef0f4;border:none;border-radius:30px;font-size:14px;color:#1e2b3a;font-weight:500;box-shadow:inset 6px 6px 12px #b8b9be,inset -6px -6px 12px #ffffff;outline:none;transition:all 0.2s;}
+.input-field::placeholder{color:#8f9bb3;}
+.input-field:focus{box-shadow:inset 8px 8px 14px #b8b9be,inset -8px -8px 14px #ffffff;}
+textarea.input-field{resize:vertical;min-height:160px;line-height:1.5;font-family:'JetBrains Mono',monospace;font-size:12px;border-radius:24px;}
+.upload-zone{width:100%;padding:22px;background:#eef0f4;border:none;border-radius:30px;box-shadow:inset 6px 6px 12px #b8b9be,inset -6px -6px 12px #ffffff;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:0.2s;color:#4a5c72;font-weight:600;font-size:13px;}
+.upload-zone.drag-over{box-shadow:inset 4px 4px 8px #b8b9be,inset -4px -4px 8px #ffffff;color:#4a90e2;}
+.upload-zone i{font-size:28px;color:#4a90e2;}
+.upload-zone .upload-sub{font-size:11px;color:#8f9bb3;font-weight:500;}
+#fileInput{display:none;}
+.toggle-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+.toggle-item{background:#eef0f4;border-radius:30px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:6px 6px 12px #b8b9be,-6px -6px 12px #ffffff;}
+.toggle-label{font-size:11px;font-weight:700;color:#2d4059;text-transform:uppercase;letter-spacing:0.5px;}
+.toggle-sub{font-size:9px;color:#8f9bb3;font-weight:500;margin-top:2px;}
+.switch{position:relative;display:inline-block;width:42px;height:24px;flex-shrink:0;}
+.switch input{opacity:0;width:0;height:0;}
+.slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#c8cdd6;border-radius:24px;transition:.3s;box-shadow:inset 2px 2px 4px #b8b9be,inset -2px -2px 4px #ffffff;}
+.slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.3s;box-shadow:2px 2px 4px #b8b9be;}
+input:checked+.slider{background:#4a90e2;}
+input:checked+.slider:before{transform:translateX(18px);}
+.method-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.method-btn{background:#eef0f4;border:none;padding:12px 6px;border-radius:30px;font-weight:700;font-size:11px;color:#2d4059;box-shadow:7px 7px 14px #b8b9be,-7px -7px 14px #ffffff;cursor:pointer;transition:0.12s linear;text-align:center;text-transform:uppercase;letter-spacing:0.5px;}
+.method-btn.active{box-shadow:inset 5px 5px 10px #b8b9be,inset -5px -5px 10px #ffffff;color:#1e4b8b;}
+.btn-row{display:flex;gap:12px;margin:15px 0;}
+.btn-primary{flex:1;background:#4a90e2;border:none;padding:18px 20px;border-radius:40px;font-weight:800;font-size:15px;color:white;text-transform:uppercase;letter-spacing:2px;box-shadow:8px 8px 18px #b8b9be,-8px -8px 18px #ffffff;cursor:pointer;transition:all 0.15s;border:1px solid rgba(255,255,255,0.3);}
+.btn-primary:hover{background:#3d7bc1;box-shadow:5px 5px 10px #b8b9be,-5px -5px 10px #ffffff;transform:translateY(-2px);}
+.btn-primary:disabled{opacity:0.7;background:#8a9bb5;transform:none;box-shadow:inset 5px 5px 10px #8f9bb3,inset -5px -5px 10px #ffffff;cursor:not-allowed;}
+.btn-secondary{background:#eef0f4;border:none;padding:18px 22px;border-radius:40px;font-weight:700;font-size:14px;color:#4a5c72;box-shadow:7px 7px 14px #b8b9be,-7px -7px 14px #ffffff;cursor:pointer;transition:0.12s;}
+.btn-secondary:hover{box-shadow:inset 4px 4px 8px #b8b9be,inset -4px -4px 8px #ffffff;color:#1e3b4f;}
+.btn-secondary:disabled{opacity:0.5;cursor:not-allowed;}
+.btn-cancel{background:#eef0f4;border:none;padding:18px 20px;border-radius:40px;font-weight:800;font-size:13px;color:#b91c1c;box-shadow:8px 8px 18px #b8b9be,-8px -8px 18px #ffffff;cursor:pointer;transition:0.12s;display:none;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:1px;}
+.btn-cancel.visible{display:flex;}
+.terminal{background:#dde1e7;border-radius:24px;padding:18px;height:140px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:12px;color:#1e3b4f;box-shadow:inset 8px 8px 16px #b8b9be,inset -8px -8px 16px #ffffff;margin-bottom:16px;line-height:1.6;}
+.terminal-line{margin-bottom:4px;word-break:break-word;}
+.log-ok{color:#1e6b2d;}.log-warn{color:#cc7700;}.log-err{color:#b91c1c;}.log-clean{color:#1565c0;}
+.output-area{width:100%;min-height:220px;padding:18px;background:#dde1e7;border:none;border-radius:24px;box-shadow:inset 8px 8px 16px #b8b9be,inset -8px -8px 16px #ffffff;font-family:'JetBrains Mono',monospace;font-size:12px;color:#1e2b3a;resize:vertical;line-height:1.6;outline:none;margin-bottom:12px;}
+.progress-wrap{display:none;margin-bottom:6px;background:#dde1e7;border-radius:30px;box-shadow:inset 4px 4px 8px #b8b9be,inset -4px -4px 8px #ffffff;padding:5px;}
+.progress-wrap.visible{display:block;}
+.progress-bar{height:10px;border-radius:30px;background:linear-gradient(90deg,#4a90e2,#0088cc);width:0%;transition:width 0.25s ease;box-shadow:0 2px 6px rgba(74,144,226,0.4);}
+.progress-label{font-size:10px;font-weight:700;color:#4a5c72;text-align:center;margin-top:5px;margin-bottom:10px;display:none;letter-spacing:0.5px;}
+.progress-label.visible{display:block;}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px;}
+.stat-box{background:#eef0f4;border-radius:20px;padding:12px 6px;text-align:center;box-shadow:6px 6px 12px #b8b9be,-6px -6px 12px #ffffff;}
+.stat-val{font-size:16px;font-weight:800;color:#2d4059;font-family:'JetBrains Mono',monospace;}
+.stat-label{font-size:9px;color:#8f9bb3;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;}
+.action-row{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+.btn-action{flex:1;min-width:80px;background:#eef0f4;border:none;padding:13px 10px;border-radius:30px;font-weight:700;font-size:11px;color:#4a5c72;box-shadow:6px 6px 12px #b8b9be,-6px -6px 12px #ffffff;cursor:pointer;transition:0.12s;display:flex;align-items:center;justify-content:center;gap:5px;text-transform:uppercase;letter-spacing:0.5px;}
+.btn-action:hover{box-shadow:inset 4px 4px 8px #b8b9be,inset -4px -4px 8px #ffffff;color:#1e3b4f;}
+.size-warn{display:none;background:#fff3cd;border-radius:20px;padding:8px 16px;margin-bottom:14px;font-size:11px;font-weight:700;color:#856404;text-align:center;}
+.size-warn.visible{display:block;}
+.divider{height:1px;background:linear-gradient(90deg,transparent,#c8cdd6,transparent);margin:18px 0;}
+.telegram-ad{background:#eef0f4;border-radius:40px;padding:18px 22px;margin:10px 0 18px;box-shadow:12px 12px 24px #b8b9be,-12px -12px 24px #ffffff;display:flex;align-items:center;gap:15px;flex-wrap:wrap;justify-content:space-between;border:1px solid #ffffff50;}
+.ad-content{display:flex;align-items:center;gap:12px;}
+.telegram-icon{background:#0088cc;width:48px;height:48px;border-radius:30px;display:flex;align-items:center;justify-content:center;font-size:26px;color:white;box-shadow:5px 5px 10px #b8b9be,-5px -5px 10px #ffffff;}
+.wa-icon{background:#25d366;}
+.ad-text h4{font-size:15px;font-weight:800;color:#1e3b4f;}
+.ad-text p{font-size:12px;color:#4a5c72;font-weight:500;display:flex;align-items:center;gap:5px;}
+.ad-badge{background:#ff9800;color:#1e1e2a;font-size:10px;font-weight:800;padding:3px 8px;border-radius:20px;}
+.join-btn{background:#eef0f4;text-decoration:none;font-weight:700;font-size:13px;padding:11px 18px;border-radius:40px;color:#0088cc;box-shadow:5px 5px 12px #b8b9be,-5px -5px 12px #ffffff;transition:0.1s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;}
+.join-btn:hover{box-shadow:inset 4px 4px 10px #b8b9be,inset -4px -4px 10px #ffffff;}
+.join-btn.wa{color:#25d366;}
+.telegram-footer{text-align:center;display:flex;flex-direction:column;gap:10px;}
+.btn-footer{display:inline-flex;align-items:center;justify-content:center;gap:10px;background:#eef0f4;padding:16px 35px;border-radius:40px;text-decoration:none;font-weight:800;font-size:16px;color:#0088cc;box-shadow:9px 9px 18px #b8b9be,-9px -9px 18px #ffffff;transition:0.1s;border:1px solid #ffffff70;}
+.btn-footer i{font-size:22px;}
+.btn-footer:hover{box-shadow:inset 6px 6px 14px #b8b9be,inset -6px -6px 14px #ffffff;}
+.btn-footer.wa{color:#25d366;}
+.page-footer{width:100%;max-width:520px;text-align:center;padding:16px 0 28px;font-size:12px;color:#8f9bb3;font-weight:600;}
+.page-footer a{color:#4a90e2;text-decoration:none;}
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;z-index:9999;opacity:1;transition:opacity 0.3s ease;}
+.modal-overlay.hidden{opacity:0;pointer-events:none;}
+.modal-card{background:#eef0f4;max-width:380px;width:90%;border-radius:60px;padding:30px 25px 25px;box-shadow:25px 25px 45px #b8b9be,-25px -25px 45px #ffffff;text-align:center;position:relative;border:2px solid #ffffff70;animation:popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);}
+@keyframes popIn{0%{transform:scale(0.7);opacity:0}100%{transform:scale(1);opacity:1}}
+.modal-close{position:absolute;top:18px;right:22px;background:#eef0f4;width:40px;height:40px;border-radius:30px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#4a5c72;cursor:pointer;box-shadow:6px 6px 12px #b8b9be,-6px -6px 12px #ffffff;border:none;transition:0.1s;z-index:10001;}
+.modal-close:hover{box-shadow:inset 4px 4px 8px #b8b9be,inset -4px -4px 8px #ffffff;}
+.modal-icon{font-size:64px;margin-bottom:5px;}
+.modal-icon.tg{color:#0088cc;}.modal-icon.wa{color:#25d366;}
+.modal-title{font-size:28px;font-weight:800;color:#2d4059;margin-bottom:8px;text-transform:uppercase;}
+.modal-tagline{font-size:15px;font-weight:600;background:#d4dae3;display:inline-block;padding:6px 20px;border-radius:40px;color:#1e3b4f;margin:5px 0 15px;box-shadow:inset 3px 3px 8px #b8b9be,inset -3px -3px 8px #ffffff;}
+.modal-text{font-size:14px;font-weight:600;color:#1e3b4f;margin:15px 0 20px;background:#d9dee6;padding:14px;border-radius:30px;box-shadow:inset 5px 5px 12px #b8b9be,inset -5px -5px 12px #ffffff;}
+.modal-btns{display:flex;flex-direction:column;gap:10px;}
+.modal-btn{display:inline-flex;align-items:center;justify-content:center;gap:12px;color:white;text-decoration:none;font-weight:800;font-size:16px;padding:14px 30px;border-radius:50px;width:100%;box-shadow:8px 8px 16px #b8b9be,-8px -8px 16px #ffffff;transition:0.1s;border:1px solid #ffffff90;}
+.modal-btn.tg{background:#0088cc;}.modal-btn.tg:hover{background:#006699;color:white;}
+.modal-btn.wa{background:#25d366;}.modal-btn.wa:hover{background:#1da851;color:white;}
+.modal-btn i{font-size:22px;}
+.modal-footer-note{margin-top:14px;font-size:11px;color:#7c8ba0;font-weight:600;}
+/* Sandbox panel */
+.sandbox-panel{background:#eef0f4;border-radius:30px;padding:20px;margin-bottom:20px;box-shadow:inset 6px 6px 12px #b8b9be,inset -6px -6px 12px #ffffff;}
+.sandbox-output{width:100%;min-height:120px;padding:14px;background:#1e2b3a;border:none;border-radius:20px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#a8d8a8;resize:vertical;line-height:1.6;outline:none;margin-top:12px;}
+.sandbox-badge{display:inline-flex;align-items:center;gap:6px;background:#fff3cd;border-radius:20px;padding:6px 14px;font-size:11px;font-weight:700;color:#856404;margin-bottom:10px;}
+.sandbox-badge.safe{background:#d4edda;color:#155724;}
+/* URL extractor */
+.url-panel{background:#eef0f4;border-radius:30px;padding:20px;margin-bottom:20px;box-shadow:inset 6px 6px 12px #b8b9be,inset -6px -6px 12px #ffffff;}
+.url-list{max-height:220px;overflow-y:auto;margin-top:10px;}
+.url-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;background:#eef0f4;border-radius:20px;margin-bottom:8px;box-shadow:4px 4px 8px #b8b9be,-4px -4px 8px #ffffff;}
+.url-item a{font-family:'JetBrains Mono',monospace;font-size:11px;color:#1565c0;word-break:break-all;text-decoration:none;flex:1;}
+.url-item a:hover{text-decoration:underline;}
+.url-item .url-copy{background:#eef0f4;border:none;font-size:11px;font-weight:700;color:#4a5c72;cursor:pointer;padding:5px 10px;border-radius:14px;box-shadow:3px 3px 6px #b8b9be,-3px -3px 6px #ffffff;white-space:nowrap;transition:0.1s;}
+.url-item .url-copy:hover{box-shadow:inset 2px 2px 4px #b8b9be,inset -2px -2px 4px #ffffff;}
+.url-tag{font-size:9px;font-weight:800;padding:2px 7px;border-radius:10px;color:white;white-space:nowrap;}
+.tag-http{background:#2e7d32;}.tag-ws{background:#6a1b9a;}.tag-suspicious{background:#b71c1c;}
+.url-empty{text-align:center;color:#8f9bb3;font-size:12px;font-weight:600;padding:20px;}
+.url-stats{font-size:11px;font-weight:700;color:#4a5c72;margin-bottom:8px;}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-thumb{background:#a1aec0;border-radius:20px;}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     WORKER CODE — browser ignores this script tag
+     but we read its text to make a Blob Worker.
+     NO escaping needed here at all.
+     ═══════════════════════════════════════════ -->
+<script id="workerCode" type="text/js-worker">
+"use strict";
+
+/* ──────────────── HELPERS ──────────────── */
+function scoreEnglish(s) {
+  var f = 'etaoinshrdlcumwfgypbvkjxqz', n = 0, l = s.toLowerCase();
+  for (var i = 0; i < l.length; i++) if (f.indexOf(l[i]) !== -1) n++;
+  return n / (s.length || 1);
+}
+
+/* ──────────────── DECODERS ──────────────── */
+function decodeBase64(s) {
+  try {
+    var t = s.trim().replace(/\s/g, '');
+    if (t.length < 4) return { result: s, success: false };
+    return { result: atob(t), success: true };
+  } catch(e) {
+    try { return { result: atob(s.trim().replace(/-/g,'+').replace(/_/g,'/')), success: true }; }
+    catch(e2) { return { result: s, success: false }; }
+  }
+}
+
+function decodeHex(s) {
+  try {
+    var h = s.trim().replace(/0x/gi,'').replace(/[\s,;]+/g,'');
+    if (!/^[0-9a-fA-F]+$/.test(h) || h.length % 2 !== 0) return { result: s, success: false };
+    var r = '';
+    for (var i = 0; i < h.length; i += 2) r += String.fromCharCode(parseInt(h.substr(i,2), 16));
+    return { result: r, success: true };
+  } catch(e) { return { result: s, success: false }; }
+}
+
+function decodeURL(s) {
+  try { var d = decodeURIComponent(s); return { result: d, success: d !== s }; }
+  catch(e) { return { result: s, success: false }; }
+}
+
+function decodeUnicode(s) {
+  var d = s
+    .replace(/\\u([0-9a-fA-F]{4})/g, function(_,c){ return String.fromCharCode(parseInt(c,16)); })
+    .replace(/\\x([0-9a-fA-F]{2})/g, function(_,c){ return String.fromCharCode(parseInt(c,16)); });
+  return { result: d, success: d !== s };
+}
+
+function decodeHTMLEntities(s) {
+  var MAP = {
+    '&amp;':'&','&lt;':'<','&gt;':'>','&quot;':'"','&apos;':"'",
+    '&nbsp;':' ','&copy;':'©','&reg;':'®','&trade;':'™',
+    '&mdash;':'—','&ndash;':'–','&hellip;':'…'
+  };
+  var d = s.replace(/&[a-zA-Z]+;/g, function(m){ return MAP[m] || m; });
+  d = d.replace(/&#([0-9]+);/g, function(_,n){ return String.fromCharCode(parseInt(n,10)); });
+  d = d.replace(/&#x([0-9a-fA-F]+);/g, function(_,h){ return String.fromCharCode(parseInt(h,16)); });
+  return { result: d, success: d !== s };
+}
+
+function decodeROT13(s) {
+  var d = s.replace(/[a-zA-Z]/g, function(c){
+    var b = c <= 'Z' ? 65 : 97;
+    return String.fromCharCode((c.charCodeAt(0) - b + 13) % 26 + b);
+  });
+  return { result: d, success: d !== s };
+}
+
+function decodeBinary(s) {
+  try {
+    var g = s.trim().split(/\s+/);
+    if (!g.every(function(x){ return /^[01]{4,}$/.test(x); })) return { result: s, success: false };
+    var d = g.map(function(x){ return String.fromCharCode(parseInt(x,2)); }).join('');
+    return { result: d, success: true };
+  } catch(e) { return { result: s, success: false }; }
+}
+
+function decodeOctal(s) {
+  try {
+    var g = s.trim().split(/\s+/);
+    if (!g.every(function(x){ return /^0?[0-7]+$/.test(x); })) return { result: s, success: false };
+    var d = g.map(function(x){ return String.fromCharCode(parseInt(x,8)); }).join('');
+    return { result: d, success: true };
+  } catch(e) { return { result: s, success: false }; }
+}
+
+function decodeMorse(s) {
+  var M = {
+    '.-':'A','-..':'B','-.-.':'C','-..':'D','.':'E','..-.':'F',
+    '--.':'G','....':'H','..':'I','.---':'J','-.-':'K','.-..':'L',
+    '--':'M','-.':'N','---':'O','.--.':'P','--.-':'Q','.-.':'R',
+    '...':'S','-':'T','..-':'U','...-':'V','.--':'W','-..-':'X',
+    '-.--':'Y','--..':'Z',
+    '-----':'0','.----':'1','..---':'2','...--':'3','....-':'4',
+    '.....':'5','-....':'6','--...':'7','---..':'8','----.':'9'
+  };
+  try {
+    var words = s.trim().split(/\s{2,}|\s*\/\s*/);
+    var d = words.map(function(w){
+      return w.split(' ').map(function(c){ return M[c] || c; }).join('');
+    }).join(' ');
+    return { result: d, success: d !== s };
+  } catch(e) { return { result: s, success: false }; }
+}
+
+function decodeAtbash(s) {
+  var d = s.replace(/[a-zA-Z]/g, function(c){
+    var b = c <= 'Z' ? 65 : 97;
+    return String.fromCharCode(b + 25 - (c.charCodeAt(0) - b));
+  });
+  return { result: d, success: d !== s };
+}
+
+function decodeCaesar(s, isLarge) {
+  var sample = isLarge ? s.slice(0, 51200) : s;
+  var bestShift = 0, bestScore = 0;
+  for (var sh = 1; sh <= 25; sh++) {
+    var t = sample.replace(/[a-zA-Z]/g, function(c){
+      var b = c <= 'Z' ? 65 : 97;
+      return String.fromCharCode((c.charCodeAt(0) - b - sh + 26) % 26 + b);
+    });
+    var sc = scoreEnglish(t);
+    if (sc > bestScore) { bestScore = sc; bestShift = sh; }
+  }
+  if (!bestShift) return { result: s, success: false };
+  var shift = bestShift;
+  var d = s.replace(/[a-zA-Z]/g, function(c){
+    var b = c <= 'Z' ? 65 : 97;
+    return String.fromCharCode((c.charCodeAt(0) - b - shift + 26) % 26 + b);
+  });
+  return { result: d, success: d !== s };
+}
+
+function decodeXOR(s, isLarge) {
+  var hexStr = s.replace(/\s+/g,'');
+  var bytes = [];
+  if (/^[0-9a-fA-F]+$/.test(hexStr) && hexStr.length % 2 === 0) {
+    var lim = isLarge ? Math.min(hexStr.length, 102400) : hexStr.length;
+    for (var i = 0; i < lim; i += 2) bytes.push(parseInt(hexStr.substr(i,2),16));
+  } else {
+    var lim2 = isLarge ? Math.min(s.length, 51200) : s.length;
+    for (var j = 0; j < lim2; j++) bytes.push(s.charCodeAt(j));
+  }
+  var bestKey = 0, bestScore = 0;
+  for (var k = 1; k < 256; k++) {
+    var samp = bytes.slice(0,512).map(function(b){ return String.fromCharCode(b ^ k); }).join('');
+    var sc = scoreEnglish(samp);
+    if (sc > bestScore) { bestScore = sc; bestKey = k; }
+  }
+  if (bestScore < 0.25) return { result: s, success: false };
+  var key = bestKey;
+  var fullHex = s.replace(/\s+/g,'');
+  var full = [];
+  if (/^[0-9a-fA-F]+$/.test(fullHex) && fullHex.length % 2 === 0) {
+    for (var ii = 0; ii < fullHex.length; ii += 2) full.push(parseInt(fullHex.substr(ii,2),16));
+  } else {
+    for (var jj = 0; jj < s.length; jj++) full.push(s.charCodeAt(jj));
+  }
+  var result = full.map(function(b){ return String.fromCharCode(b ^ key); }).join('');
+  return { result: result, success: true };
+}
+
+function decodePackedJS(s) {
+  try {
+    if (!/eval\s*\(\s*function\s*\(p,a,c,k,e/i.test(s)) return { result: s, success: false };
+    var match = s.match(/\}\s*\('(.+)',\s*(\d+),\s*(\d+),\s*'(.*?)'\s*\.split\('\|'\)/s);
+    if (!match) return { result: s, success: false };
+    var payload = match[1], radix = parseInt(match[2]), dictStr = match[4];
+    var dict = dictStr.split('|');
+    var d = payload.replace(/\b\w+\b/g, function(w){
+      var idx = parseInt(w, radix);
+      return (dict[idx] && dict[idx] !== '') ? dict[idx] : w;
+    });
+    return { result: d, success: d !== s };
+  } catch(e) { return { result: 'PackedJS: ' + e.message, success: false }; }
+}
+
+function decodeBrainfuck(s) {
+  try {
+    var code = s.replace(/[^+\-[\].,<>]/g,'');
+    if (!code || code.length < 5) return { result: s, success: false };
+    var mem = new Uint8Array(30000), ptr = 0, out = '', cp = 0, steps = 0;
+    while (cp < code.length && steps++ < 2000000) {
+      var c = code[cp];
+      if      (c==='+') mem[ptr] = (mem[ptr]+1) % 256;
+      else if (c==='-') mem[ptr] = (mem[ptr]+255) % 256;
+      else if (c==='>') ptr = (ptr+1) % 30000;
+      else if (c==='<') ptr = (ptr+29999) % 30000;
+      else if (c==='.') { out += String.fromCharCode(mem[ptr]); if (out.length > 50000) break; }
+      else if (c==='[' && mem[ptr]===0) { var d1=1; while(d1){cp++;if(code[cp]==='[')d1++;else if(code[cp]===']')d1--;} }
+      else if (c===']' && mem[ptr]!==0) { var d2=1; while(d2){cp--;if(code[cp]===']')d2++;else if(code[cp]==='[')d2--;} }
+      cp++;
+    }
+    return { result: out || '(no output)', success: out.length > 0 };
+  } catch(e) { return { result: 'Brainfuck: ' + e.message, success: false }; }
+}
+
+/* ──────────────── LAYER DETECTION ──────────────── */
+function detectLayers(s) {
+  var layers = [], t = s.trim(), noWs = t.replace(/\s/g,'');
+  if (noWs.length > 8 && /^[A-Za-z0-9+\/=]+$/.test(noWs) && noWs.length % 4 === 0) {
+    try { atob(noWs); layers.push('base64'); } catch(e) {}
+  }
+  if (/\\u[0-9a-fA-F]{4}|\\x[0-9a-fA-F]{2}/.test(s)) layers.push('unicode');
+  if (/&[a-zA-Z]+;|&#\d+;|&#x[0-9a-fA-F]+;/.test(s)) layers.push('html-entities');
+  if (/%[0-9a-fA-F]{2}/.test(s)) layers.push('url');
+  if (/^([0-9a-fA-F]{2}\s)+[0-9a-fA-F]{2}$/.test(t)) layers.push('hex');
+  if (/^([01]{8}\s?)+$/.test(t)) layers.push('binary');
+  if (/eval\s*\(\s*function\s*\(p,a,c,k,e/i.test(s)) layers.push('packed');
+  return layers;
+}
+
+/* ════════════════════════════════════════
+   POST-PROCESSING PIPELINE
+   ════════════════════════════════════════ */
+
+function resolveStringArrays(s) {
+  var arrayDef = /var\s+(\w+)\s*=\s*\[([^\]]+)\]/g;
+  var m;
+  while ((m = arrayDef.exec(s)) !== null) {
+    var arrName = m[1], vals = [], valRe = /["']([^"'\\]*)["']/g, vm;
+    while ((vm = valRe.exec(m[2])) !== null) vals.push(vm[1]);
+    if (!vals.length) continue;
+    var escaped = arrName.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    var accessRe = new RegExp(escaped + '\\[(\\d+)\\]', 'g');
+    s = s.replace(accessRe, function(full, idx){
+      var index = parseInt(idx);
+      return index < vals.length ? '"' + vals[index] + '"' : full;
+    });
+  }
+  return s;
+}
+
+function evalHexLiterals(s) {
+  return s.replace(/\b0x([0-9a-fA-F]+)\b/g, function(m, h){
+    var n = parseInt(h, 16);
+    return String(n).length <= m.length + 2 ? String(n) : m;
+  });
+}
+
+function evalConstantExpressions(s) {
+  var OPS = /\(\s*(-?\d+(?:\.\d+)?)\s*([+\-*\/])\s*(-?\d+(?:\.\d+)?)\s*\)/g;
+  var prev = '';
+  for (var pass = 0; pass < 6 && prev !== s; pass++) {
+    prev = s;
+    s = s.replace(OPS, function(m, a, op, b){
+      var x = parseFloat(a), y = parseFloat(b), r;
+      if      (op==='+') r = x + y;
+      else if (op==='-') r = x - y;
+      else if (op==='*') r = x * y;
+      else if (op==='/') { if (y===0) return m; r = x / y; }
+      if (!isFinite(r)) return m;
+      return Number.isInteger(r) ? String(r) : r.toFixed(4);
+    });
+  }
+  return s;
+}
+
+function renameObfuscatedVars(s) {
+  var seen = {}, counter = 1;
+  return s.replace(/\b(_0x[a-fA-F0-9]{2,8})\b/g, function(m){
+    if (!seen[m]) seen[m] = 'var_' + (counter++);
+    return seen[m];
+  });
+}
+
+function removeDeadCode(s) {
+  var lines = s.split('\n');
+  var deadCount = 0, cleaned = [], prevBlank = false;
+  var deadPatterns = [
+    /while\s*\(!!\[\]\)/,
+    /^\s*debugger\s*;?\s*$/,
+    /^\s*void\s+0\s*;?\s*$/,
+    /^\s*["'][A-Za-z0-9+\/=]{20,}["']\s*[,;]?\s*$/,
+    /^\s*var\s+var_\d+\s*=\s*\d+\s*;\s*$/,
+    /catch\s*\(\s*\w*\s*\)\s*\{\s*\}/
+  ];
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i], trimmed = line.trim();
+    if (trimmed === '') {
+      if (!prevBlank) cleaned.push('');
+      prevBlank = true; continue;
+    }
+    prevBlank = false;
+    var isDead = false;
+    for (var j = 0; j < deadPatterns.length; j++) {
+      if (deadPatterns[j].test(line)) { isDead = true; deadCount++; break; }
+    }
+    if (!isDead) cleaned.push(line);
+  }
+  return { result: cleaned.join('\n'), removed: deadCount };
+}
+
+function beautifyJS(s) {
+  var looksLikeCode = (s.indexOf('{') !== -1 && s.indexOf('}') !== -1) || s.indexOf(';') !== -1;
+  if (!looksLikeCode) return s;
+
+  // Normalize & add newlines
+  s = s
+    .replace(/[ \t]+/g, ' ')
+    .replace(/([^=!<>+\-*\/&|])=([^>=])/g, '$1 = $2')
+    .replace(/,([^\s\n])/g, ', $1')
+    .replace(/;([^\s\n])/g, ';\n$1')
+    .replace(/\{([^\n])/g, '{\n$1')
+    .replace(/([^\n])\}/g, '$1\n}')
+    .replace(/\n{3,}/g, '\n\n');
+
+  // Indent
+  var lines = s.split('\n'), result = [], level = 0, TAB = '    ';
+  for (var i = 0; i < lines.length; i++) {
+    var t = lines[i].trim();
+    if (t === '') { result.push(''); continue; }
+    if (/^[}\])]/.test(t)) level = Math.max(0, level - 1);
+    result.push(TAB.repeat(level) + t);
+    var opens  = (t.match(/[{[(]/g) || []).length;
+    var closes = (t.match(/[}\])]/g) || []).length;
+    level = Math.max(0, level + opens - closes);
+  }
+  return result.join('\n');
+}
+
+/* ──────────────── MAIN HANDLER ──────────────── */
+self.onmessage = function(e) {
+  var input = e.data.input;
+  var method = e.data.method;
+  var isLarge = e.data.isLarge;
+  var opts = e.data.opts;
+
+  var current = input;
+  var totalLayers = 0;
+  var detectedBadge = [];
+
+  function post(type, msg, pct) {
+    self.postMessage({ type: type, msg: msg, pct: pct });
+  }
+
+  var methodMap = {
+    'base64':       function(){ return decodeBase64(current); },
+    'hex':          function(){ return decodeHex(current); },
+    'url':          function(){ return decodeURL(current); },
+    'unicode':      function(){ return decodeUnicode(current); },
+    'html':         function(){ return decodeHTMLEntities(current); },
+    'html-entities':function(){ return decodeHTMLEntities(current); },
+    'rot13':        function(){ return decodeROT13(current); },
+    'binary':       function(){ return decodeBinary(current); },
+    'octal':        function(){ return decodeOctal(current); },
+    'morse':        function(){ return decodeMorse(current); },
+    'atbash':       function(){ return decodeAtbash(current); },
+    'caesar':       function(){ return decodeCaesar(current, isLarge); },
+    'xor':          function(){ return decodeXOR(current, isLarge); },
+    'packed':       function(){ return decodePackedJS(current); },
+    'brainfuck':    function(){ return decodeBrainfuck(current); }
+  };
+
+  /* PHASE 1 — DECODE */
+  post('log', 'PHASE 1: Decoding ' + input.length.toLocaleString() + ' chars...', 5);
+
+  if (method === 'auto') {
+    var changed = true, pass = 0;
+    while (changed && pass < 12) {
+      changed = false; pass++;
+      var layers = detectLayers(current);
+      if (layers.length) post('log', 'pass ' + pass + ': ' + layers.join(', '), 8 + pass * 4);
+      for (var li = 0; li < layers.length; li++) {
+        var layer = layers[li];
+        var fn = methodMap[layer];
+        if (!fn) continue;
+        var res = fn();
+        if (res.success && res.result !== current) {
+          current = res.result; totalLayers++;
+          if (detectedBadge.indexOf(layer) === -1) detectedBadge.push(layer);
+          changed = true;
+          post('log-ok', '✓ ' + layer + ' decoded', null);
+        }
+      }
+      var u = decodeUnicode(current); if (u.success) { current = u.result; changed = true; }
+      var h = decodeHTMLEntities(current); if (h.success) { current = h.result; changed = true; }
+    }
+    // Fallback
+    if (totalLayers === 0) {
+      var fallbacks = ['base64','hex','url','rot13','binary','atbash'];
+      for (var fi = 0; fi < fallbacks.length; fi++) {
+        var ffn = methodMap[fallbacks[fi]];
+        if (!ffn) continue;
+        var fres = ffn();
+        if (fres.success && fres.result !== current) {
+          current = fres.result; totalLayers++;
+          detectedBadge.push(fallbacks[fi]);
+          post('log-ok', '✓ fallback: ' + fallbacks[fi], null);
+          break;
+        }
+      }
+    }
+    if (totalLayers === 0) post('log-warn', 'no encoding detected — output unchanged', null);
+  } else {
+    var sfn = methodMap[method];
+    if (sfn) {
+      var sres = sfn();
+      if (sres.success) {
+        current = sres.result; totalLayers = 1;
+        detectedBadge.push(method);
+        post('log-ok', '✓ ' + method + ' decoded', null);
+      } else {
+        post('log-err', 'decode failed: ' + method, null);
+      }
+    }
+  }
+
+  post('log', 'PHASE 1 complete — ' + totalLayers + ' layer(s)', 50);
+
+  /* PHASE 2 — CLEAN */
+  post('log', 'PHASE 2: Cleaning & beautifying...', 55);
+  var deadRemoved = 0;
+  var cleanBadge = [];
+
+  if (opts.beautify) {
+    var before = current;
+    current = resolveStringArrays(current);
+    if (current !== before) { post('log-clean', '✓ string arrays inlined', null); cleanBadge.push('str-arrays'); }
+  }
+  if (opts.evalHex) {
+    var bh = current;
+    current = evalHexLiterals(current);
+    if (current !== bh) { post('log-clean', '✓ hex literals → decimal', null); cleanBadge.push('hex-eval'); }
+    var bc = current;
+    current = evalConstantExpressions(current);
+    if (current !== bc) { post('log-clean', '✓ constant expressions folded', null); cleanBadge.push('const-fold'); }
+  }
+  if (opts.rename) {
+    var br = current;
+    current = renameObfuscatedVars(current);
+    if (current !== br) { post('log-clean', '✓ obfuscated vars renamed → var_N', null); cleanBadge.push('var-rename'); }
+  }
+  if (opts.deadCode) {
+    var dr = removeDeadCode(current);
+    current = dr.result; deadRemoved = dr.removed;
+    if (deadRemoved > 0) { post('log-clean', '✓ ' + deadRemoved + ' dead lines removed', null); cleanBadge.push('dead-code'); }
+  }
+  if (opts.beautify) {
+    var bb = current;
+    current = beautifyJS(current);
+    if (current !== bb) { post('log-clean', '✓ code formatted & indented', null); cleanBadge.push('beautify'); }
+  }
+
+  post('log', 'PHASE 2 complete', 95);
+  post('done', '', 100);
+  self.postMessage({
+    type: 'result',
+    output: current,
+    layers: totalLayers,
+    deadRemoved: deadRemoved,
+    badge: detectedBadge.concat(cleanBadge)
+  });
+};
+</script>
+
+<!-- ═══════════════════════════════════════════ POPUP ═══ -->
+<div class="modal-overlay" id="joinPopup">
+  <div class="modal-card">
+    <button class="modal-close" id="closePopup"><i class="fas fa-times"></i></button>
+    <div class="modal-icon tg"><i class="fab fa-telegram-plane"></i></div>
+    <div class="modal-title">JOIN US</div>
+    <div class="modal-tagline">Tools &amp; Updates</div>
+    <div class="modal-text"><strong>@kaaxhunter</strong><br>Exclusive deobfuscation tools, new drops &amp; direct dev support.</div>
+    <div class="modal-btns">
+      <a href="https://t.me/kaaxupdates" target="_blank" class="modal-btn tg"><i class="fab fa-telegram-plane"></i> JOIN TELEGRAM</a>
+      <a href="https://whatsapp.com/channel/0029Vb6jJ1h2UPBIiqvzpg3O" target="_blank" class="modal-btn wa"><i class="fab fa-whatsapp"></i> JOIN WHATSAPP</a>
+    </div>
+    <div class="modal-footer-note">free &bull; by @kaaxhunter</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ MAIN CARD ═══ -->
+<div class="neo-card">
+  <div class="logo-wrapper"><div class="logo-icon"><i class="fas fa-shield-alt"></i></div></div>
+  <h1 class="title-main">DEOBSF</h1>
+  <div class="sub-title">Military Grade Deobfuscator &middot; v4.0</div>
+
+  <div class="detection-badge" id="detectionBadge">
+    <span class="badge-label">🔍 Processing Pipeline</span>
+    <span id="detectedLayers"></span>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-val" id="statChars">0</div><div class="stat-label">Chars In</div></div>
+    <div class="stat-box"><div class="stat-val" id="statLayers">0</div><div class="stat-label">Layers</div></div>
+    <div class="stat-box"><div class="stat-val" id="statDead">0</div><div class="stat-label">Dead Lines</div></div>
+    <div class="stat-box"><div class="stat-val" id="statOut">0</div><div class="stat-label">Chars Out</div></div>
+  </div>
+
+  <div class="input-group">
+    <label class="label-text"><i class="fas fa-keyboard"></i>&nbsp; Paste Obfuscated Code</label>
+    <textarea class="input-field" id="inputCode" placeholder="Paste obfuscated code here... (up to 2MB)" oninput="onInputChange()"></textarea>
+  </div>
+
+  <div class="input-group">
+    <label class="label-text"><i class="fas fa-file-upload"></i>&nbsp; Or Upload File (max 2MB)</label>
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+      <i class="fas fa-cloud-upload-alt"></i>
+      <span id="uploadLabel">Click or drag &amp; drop file here</span>
+      <span class="upload-sub">.js &nbsp;.txt &nbsp;.html &nbsp;.json &nbsp;.php &mdash; Max 2MB</span>
+    </div>
+    <input type="file" id="fileInput" accept=".js,.txt,.html,.json,.php,.py,.rb,.ts" onchange="handleFile(event)">
+  </div>
+
+  <div class="size-warn" id="sizeWarn">⚡ Large file — XOR/Caesar will sample 50KB for key detection then apply to full input</div>
+
+  <div class="input-group">
+    <label class="label-text"><i class="fas fa-broom"></i>&nbsp; Post-Processing</label>
+    <div class="toggle-row">
+      <div class="toggle-item">
+        <div><div class="toggle-label">Beautify</div><div class="toggle-sub">Format &amp; indent</div></div>
+        <label class="switch"><input type="checkbox" id="togBeautify" checked><span class="slider"></span></label>
+      </div>
+      <div class="toggle-item">
+        <div><div class="toggle-label">Rename Vars</div><div class="toggle-sub">_0x1a2b → var_1</div></div>
+        <label class="switch"><input type="checkbox" id="togRename" checked><span class="slider"></span></label>
+      </div>
+      <div class="toggle-item">
+        <div><div class="toggle-label">Eval Hex</div><div class="toggle-sub">0x1f → 31</div></div>
+        <label class="switch"><input type="checkbox" id="togHex" checked><span class="slider"></span></label>
+      </div>
+      <div class="toggle-item">
+        <div><div class="toggle-label">Dead Code</div><div class="toggle-sub">Remove junk</div></div>
+        <label class="switch"><input type="checkbox" id="togDead" checked><span class="slider"></span></label>
+      </div>
+    </div>
+  </div>
+
+  <div class="input-group">
+    <label class="label-text"><i class="fas fa-magic"></i>&nbsp; Decode Method</label>
+    <div class="method-grid">
+      <button class="method-btn active" onclick="setMethod('auto',this)">⚡ Auto</button>
+      <button class="method-btn" onclick="setMethod('base64',this)">Base64</button>
+      <button class="method-btn" onclick="setMethod('hex',this)">Hex</button>
+      <button class="method-btn" onclick="setMethod('url',this)">URL</button>
+      <button class="method-btn" onclick="setMethod('unicode',this)">Unicode</button>
+      <button class="method-btn" onclick="setMethod('html',this)">HTML Ent.</button>
+      <button class="method-btn" onclick="setMethod('rot13',this)">ROT13</button>
+      <button class="method-btn" onclick="setMethod('binary',this)">Binary</button>
+      <button class="method-btn" onclick="setMethod('octal',this)">Octal</button>
+      <button class="method-btn" onclick="setMethod('morse',this)">Morse</button>
+      <button class="method-btn" onclick="setMethod('atbash',this)">Atbash</button>
+      <button class="method-btn" onclick="setMethod('caesar',this)">Caesar</button>
+      <button class="method-btn" onclick="setMethod('jsfuck',this)">JSFuck</button>
+      <button class="method-btn" onclick="setMethod('brainfuck',this)">Brainfuck</button>
+      <button class="method-btn" onclick="setMethod('packed',this)">Packed JS</button>
+      <button class="method-btn" onclick="setMethod('aaencode',this)">AAEncode</button>
+      <button class="method-btn" onclick="setMethod('jjencode',this)">JJEncode</button>
+      <button class="method-btn" onclick="setMethod('xor',this)">XOR</button>
+    </div>
+  </div>
+
+  <div class="progress-wrap" id="progressWrap"><div class="progress-bar" id="progressBar"></div></div>
+  <div class="progress-label" id="progressLabel"></div>
+
+  <div class="btn-row">
+    <button class="btn-primary" id="decryptBtn" onclick="runDecrypt()"><i class="fas fa-unlock-alt"></i>&nbsp; DEOBFUSCATE</button>
+    <button class="btn-cancel"  id="cancelBtn"  onclick="cancelDecode()"><i class="fas fa-stop"></i> STOP</button>
+    <button class="btn-secondary" id="clearBtn" onclick="clearAll()" title="Clear"><i class="fas fa-redo"></i></button>
+  </div>
+
+  <div class="terminal" id="terminal">
+    <div class="terminal-line">&gt; DEOBSF v4.0 ready &mdash; decode + clean + beautify</div>
+    <div class="terminal-line">&gt; Web Worker enabled &middot; 2MB max &middot; UI never freezes</div>
+    <div class="terminal-line">&gt; waiting for input...</div>
+  </div>
+
+  <div class="input-group">
+    <label class="label-text"><i class="fas fa-code"></i>&nbsp; Clean Output</label>
+    <textarea class="output-area" id="outputCode" readonly placeholder="Human-readable output appears here..."></textarea>
+  </div>
+
+  <div class="action-row">
+    <button class="btn-action" onclick="copyOutput()"><i class="fas fa-copy"></i> Copy</button>
+    <button class="btn-action" onclick="downloadOutput()"><i class="fas fa-download"></i> Download</button>
+    <button class="btn-action" onclick="loadOutputAsInput()"><i class="fas fa-layer-group"></i> Re-Decode</button>
+  </div>
+
+  <!-- SAFE SANDBOX -->
+  <div class="input-group">
+    <label class="label-text"><i class="fas fa-flask"></i>&nbsp; Safe Execution Sandbox</label>
+    <div class="sandbox-panel">
+      <div class="sandbox-badge" id="sandboxBadge">
+        <i class="fas fa-lock"></i> Sandboxed iframe &mdash; no DOM access &mdash; no network &mdash; isolated
+      </div>
+      <div style="font-size:11px;color:#4a5c72;font-weight:600;margin-bottom:10px;">
+        Runs decoded code in a jailed environment. Captures <code style="background:#d4dae3;padding:1px 5px;border-radius:6px;">console.log</code>, <code style="background:#d4dae3;padding:1px 5px;border-radius:6px;">document.write</code>, errors &amp; dynamic eval output.
+      </div>
+      <div class="btn-row" style="margin:0 0 0 0;">
+        <button class="btn-primary" id="sandboxBtn" onclick="runSandbox()" style="font-size:13px;padding:14px 16px;letter-spacing:1px;">
+          <i class="fas fa-play"></i>&nbsp; RUN IN SANDBOX
+        </button>
+        <button class="btn-secondary" onclick="clearSandbox()" style="padding:14px 18px;">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+      <textarea class="sandbox-output" id="sandboxOutput" readonly placeholder="Sandbox output appears here...&#10;console.log(), document.write(), errors, eval() results..."></textarea>
+    </div>
+  </div>
+
+  <!-- URL EXTRACTOR -->
+  <div class="input-group">
+    <label class="label-text"><i class="fas fa-link"></i>&nbsp; URL Extractor</label>
+    <div class="url-panel">
+      <div style="font-size:11px;color:#4a5c72;font-weight:600;margin-bottom:10px;">
+        Extracts all URLs, endpoints &amp; suspicious domains from decoded output. Detects http/https, websockets, encoded URLs &amp; base64 embedded links.
+      </div>
+      <div class="btn-row" style="margin:0 0 0 0;">
+        <button class="btn-primary" onclick="extractURLs()" style="font-size:13px;padding:14px 16px;letter-spacing:1px;">
+          <i class="fas fa-search"></i>&nbsp; EXTRACT URLS
+        </button>
+        <button class="btn-action" onclick="copyAllURLs()" style="flex:0;padding:14px 18px;white-space:nowrap;">
+          <i class="fas fa-copy"></i> Copy All
+        </button>
+      </div>
+      <div class="url-list" id="urlList">
+        <div class="url-empty">Run URL extractor to find all links &amp; endpoints</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="telegram-ad">
+    <div class="ad-content">
+      <div class="telegram-icon"><i class="fab fa-telegram-plane"></i></div>
+      <div class="ad-text"><h4>@kaaxupdates <span class="ad-badge">DEV</span></h4><p><i class="fas fa-fire" style="color:#ff9800"></i> tools by @kaaxhunter</p></div>
+    </div>
+    <a href="https://t.me/kaaxupdates" target="_blank" class="join-btn"><i class="fab fa-telegram"></i> JOIN</a>
+  </div>
+
+  <div class="telegram-ad">
+    <div class="ad-content">
+      <div class="telegram-icon wa-icon"><i class="fab fa-whatsapp"></i></div>
+      <div class="ad-text"><h4>WhatsApp Channel <span class="ad-badge">NEW</span></h4><p><i class="fas fa-bell" style="color:#25d366"></i> exclusive drops</p></div>
+    </div>
+    <a href="https://whatsapp.com/channel/0029Vb6jJ1h2UPBIiqvzpg3O" target="_blank" class="join-btn wa"><i class="fab fa-whatsapp"></i> JOIN</a>
+  </div>
+
+  <div class="telegram-footer">
+    <a href="https://t.me/kaaxupdates" target="_blank" class="btn-footer"><i class="fab fa-telegram"></i> JOIN TELEGRAM</a>
+    <a href="https://whatsapp.com/channel/0029Vb6jJ1h2UPBIiqvzpg3O" target="_blank" class="btn-footer wa"><i class="fab fa-whatsapp"></i> JOIN WHATSAPP</a>
+  </div>
+</div>
+
+<div class="page-footer">
+  <p>&#9889; DEOBSF v4.0 &middot; Military Grade Edition</p>
+  <p style="margin-top:4px;">Built with &#128293; by <a href="https://t.me/kaaxupdates" target="_blank">@kaaxhunter</a></p>
+</div>
+
+<!-- ═══════════════════════════════════════════ MAIN THREAD ═══ -->
+<script>
+var MAX_SIZE = 2 * 1024 * 1024;
+var selectedMethod = 'auto';
+var currentWorker = null;
+
+// Popup
+var popup = document.getElementById('joinPopup');
+document.getElementById('closePopup').addEventListener('click', function(){ popup.classList.add('hidden'); });
+popup.addEventListener('click', function(e){ if (e.target === popup) popup.classList.add('hidden'); });
+
+function setMethod(m, btn) {
+  selectedMethod = m;
+  document.querySelectorAll('.method-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+}
+
+function log(msg, type) {
+  var t = document.getElementById('terminal');
+  var d = document.createElement('div');
+  d.className = 'terminal-line' + (type ? ' ' + type : '');
+  d.textContent = '> ' + msg;
+  t.appendChild(d);
+  t.scrollTop = t.scrollHeight;
+}
+
+function setProgress(pct, label) {
+  document.getElementById('progressWrap').classList.add('visible');
+  document.getElementById('progressBar').style.width = pct + '%';
+  if (label !== undefined) {
+    var lbl = document.getElementById('progressLabel');
+    lbl.textContent = label; lbl.classList.add('visible');
+  }
+}
+function hideProgress() {
+  document.getElementById('progressWrap').classList.remove('visible');
+  document.getElementById('progressBar').style.width = '0%';
+  document.getElementById('progressLabel').classList.remove('visible');
+}
+
+function onInputChange() {
+  var v = document.getElementById('inputCode').value;
+  document.getElementById('statChars').textContent = v.length.toLocaleString();
+  document.getElementById('sizeWarn').classList.toggle('visible', v.length > 51200);
+}
+
+function clearAll() {
+  if (currentWorker) { currentWorker.terminate(); currentWorker = null; }
+  document.getElementById('inputCode').value = '';
+  document.getElementById('outputCode').value = '';
+  document.getElementById('terminal').innerHTML =
+    '<div class="terminal-line">&gt; cleared &middot; ready</div>';
+  document.getElementById('detectionBadge').classList.remove('visible');
+  document.getElementById('sizeWarn').classList.remove('visible');
+  ['statChars','statLayers','statDead','statOut'].forEach(function(id){
+    document.getElementById(id).textContent = '0';
+  });
+  document.getElementById('uploadLabel').textContent = 'Click or drag & drop file here';
+  hideProgress(); setUIBusy(false);
+}
+
+function copyOutput() {
+  var out = document.getElementById('outputCode').value;
+  if (!out) return;
+  navigator.clipboard.writeText(out).then(function(){ log('copied to clipboard ✓', 'log-ok'); });
+}
+
+function downloadOutput() {
+  var out = document.getElementById('outputCode').value;
+  if (!out) return;
+  var blob = new Blob([out], {type:'text/plain'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'deobfuscated_clean.js';
+  a.click();
+  log('downloaded ✓', 'log-ok');
+}
+
+function loadOutputAsInput() {
+  var out = document.getElementById('outputCode').value;
+  if (!out) return;
+  document.getElementById('inputCode').value = out;
+  document.getElementById('outputCode').value = '';
+  document.getElementById('statChars').textContent = out.length.toLocaleString();
+  document.getElementById('sizeWarn').classList.toggle('visible', out.length > 51200);
+  log('output loaded as new input', 'log-warn');
+}
+
+function handleFile(e) {
+  var file = e.target.files[0]; if (!file) return;
+  if (file.size > MAX_SIZE) { log('ERROR: file exceeds 2MB', 'log-err'); return; }
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    document.getElementById('inputCode').value = ev.target.result;
+    document.getElementById('uploadLabel').textContent = '✓ ' + file.name + ' (' + (file.size/1024).toFixed(1) + 'KB)';
+    document.getElementById('statChars').textContent = ev.target.result.length.toLocaleString();
+    document.getElementById('sizeWarn').classList.toggle('visible', file.size > 51200);
+    log('loaded: ' + file.name + ' — ' + (file.size/1024).toFixed(1) + 'KB', 'log-ok');
+  };
+  reader.readAsText(file);
+}
+
+var uploadZone = document.getElementById('uploadZone');
+uploadZone.addEventListener('dragover', function(e){ e.preventDefault(); uploadZone.classList.add('drag-over'); });
+uploadZone.addEventListener('dragleave', function(){ uploadZone.classList.remove('drag-over'); });
+uploadZone.addEventListener('drop', function(e){
+  e.preventDefault(); uploadZone.classList.remove('drag-over');
+  var file = e.dataTransfer.files[0];
+  if (file) handleFile({target:{files:[file]}});
+});
+
+function setUIBusy(busy) {
+  document.getElementById('decryptBtn').disabled = busy;
+  document.getElementById('clearBtn').disabled = busy;
+  document.getElementById('decryptBtn').innerHTML = busy
+    ? '<i class="fas fa-spinner fa-pulse"></i>&nbsp; PROCESSING...'
+    : '<i class="fas fa-unlock-alt"></i>&nbsp; DEOBFUSCATE';
+  document.getElementById('cancelBtn').classList.toggle('visible', busy);
+}
+
+function cancelDecode() {
+  if (currentWorker) { currentWorker.terminate(); currentWorker = null; }
+  log('cancelled', 'log-warn'); hideProgress(); setUIBusy(false);
+}
+
+/* ════════════════════════════════════════
+   SAFE SANDBOX
+   ════════════════════════════════════════ */
+var sandboxFrame = null;
+var sandboxTimer = null;
+
+function clearSandbox() {
+  document.getElementById('sandboxOutput').value = '';
+  document.getElementById('sandboxBadge').className = 'sandbox-badge';
+  document.getElementById('sandboxBadge').innerHTML = '<i class="fas fa-lock"></i> Sandboxed iframe &mdash; no DOM access &mdash; no network &mdash; isolated';
+  if (sandboxFrame) { document.body.removeChild(sandboxFrame); sandboxFrame = null; }
+  if (sandboxTimer) { clearTimeout(sandboxTimer); sandboxTimer = null; }
+}
+
+function runSandbox() {
+  var code = document.getElementById('outputCode').value || document.getElementById('inputCode').value;
+  if (!code.trim()) { log('no code to run — deobfuscate first or paste raw code', 'log-err'); return; }
+
+  clearSandbox();
+  var btn = document.getElementById('sandboxBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i>&nbsp; RUNNING...';
+
+  var captured = [];
+  var startTime = Date.now();
+
+  // The iframe HTML — intercepts everything, posts messages to parent
+  var iframeHTML = '<!DOCTYPE html><html><head></head><body><script>' +
+    // Override console
+    'var __cap = [];' +
+    'var __origConsole = {};' +
+    '["log","warn","error","info","debug"].forEach(function(m){' +
+    '  __origConsole[m] = console[m];' +
+    '  console[m] = function(){' +
+    '    var args = Array.prototype.slice.call(arguments);' +
+    '    var str = args.map(function(a){' +
+    '      try{ return typeof a === "object" ? JSON.stringify(a,null,2) : String(a); }' +
+    '      catch(e){ return String(a); }' +
+    '    }).join(" ");' +
+    '    __cap.push("[" + m.toUpperCase() + "] " + str);' +
+    '    parent.postMessage({type:"sandbox-log",level:m,msg:str},"*");' +
+    '  };' +
+    '});' +
+    // Override document.write
+    'document.write = function(s){ parent.postMessage({type:"sandbox-write",msg:String(s)},"*"); };' +
+    'document.writeln = document.write;' +
+    // Override alert/prompt/confirm
+    'window.alert = function(s){ parent.postMessage({type:"sandbox-log",level:"alert",msg:"[ALERT] "+String(s)},"*"); };' +
+    'window.prompt = function(s){ parent.postMessage({type:"sandbox-log",level:"prompt",msg:"[PROMPT] "+String(s)},"*"); return ""; };' +
+    'window.confirm = function(s){ parent.postMessage({type:"sandbox-log",level:"confirm",msg:"[CONFIRM] "+String(s)},"*"); return false; };' +
+    // Catch global errors
+    'window.onerror = function(msg,src,line,col,err){' +
+    '  parent.postMessage({type:"sandbox-error",msg:"[ERROR] "+msg+" (line "+line+")"},"*");' +
+    '  return true;' +
+    '};' +
+    // Run the actual code wrapped in try/catch
+    'try {' +
+    '  var __result = (function(){\n' + code + '\n})();' +
+    '  if (__result !== undefined) parent.postMessage({type:"sandbox-result",msg:"[RETURN] "+JSON.stringify(__result)},"*");' +
+    '} catch(e) {' +
+    '  parent.postMessage({type:"sandbox-error",msg:"[EXEC ERROR] "+e.message},"*");' +
+    '}' +
+    'parent.postMessage({type:"sandbox-done"},"*");' +
+    '<\/script></body></html>';
+
+  // Create sandboxed iframe — allow-scripts only, NO allow-same-origin
+  var frame = document.createElement('iframe');
+  frame.setAttribute('sandbox', 'allow-scripts');
+  frame.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;border:none;';
+  document.body.appendChild(frame);
+  sandboxFrame = frame;
+
+  var outputLines = [];
+  var done = false;
+
+  // Listen for messages from iframe
+  function onSandboxMessage(e) {
+    var d = e.data;
+    if (!d || typeof d !== 'object') return;
+
+    if (d.type === 'sandbox-log' || d.type === 'sandbox-write') {
+      var prefix = d.type === 'sandbox-write' ? '[WRITE] ' : '';
+      outputLines.push(prefix + d.msg);
+    } else if (d.type === 'sandbox-error') {
+      outputLines.push(d.msg);
+    } else if (d.type === 'sandbox-result') {
+      outputLines.push(d.msg);
+    } else if (d.type === 'sandbox-done') {
+      done = true;
+      finish();
+    }
+  }
+
+  function finish() {
+    window.removeEventListener('message', onSandboxMessage);
+    if (sandboxTimer) { clearTimeout(sandboxTimer); sandboxTimer = null; }
+
+    var elapsed = Date.now() - startTime;
+    var out = document.getElementById('sandboxOutput');
+    var badge = document.getElementById('sandboxBadge');
+
+    if (outputLines.length === 0) {
+      outputLines.push('(no output captured — code ran silently or produced no console/write calls)');
+    }
+
+    outputLines.push('\n--- sandbox finished in ' + elapsed + 'ms ---');
+    out.value = outputLines.join('\n');
+
+    badge.className = 'sandbox-badge safe';
+    badge.innerHTML = '<i class="fas fa-check-circle"></i> Executed safely &mdash; ' + outputLines.length + ' line(s) captured &mdash; ' + elapsed + 'ms';
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-play"></i>&nbsp; RUN IN SANDBOX';
+
+    log('sandbox done — ' + outputLines.length + ' line(s) captured in ' + elapsed + 'ms', 'log-ok');
+
+    // Try to extract URLs from sandbox output too
+    var combined = (document.getElementById('outputCode').value || '') + '\n' + out.value;
+    autoExtractIfURLsFound(combined);
+  }
+
+  window.addEventListener('message', onSandboxMessage);
+
+  // 10 second timeout
+  sandboxTimer = setTimeout(function() {
+    if (!done) {
+      outputLines.push('[TIMEOUT] Execution exceeded 10 seconds — terminated');
+      finish();
+    }
+  }, 10000);
+
+  // Write the code into the iframe
+  var doc = frame.contentDocument || frame.contentWindow.document;
+  doc.open();
+  doc.write(iframeHTML);
+  doc.close();
+}
+
+/* ════════════════════════════════════════
+   URL EXTRACTOR
+   ════════════════════════════════════════ */
+var extractedURLs = [];
+
+function extractURLs() {
+  var source = document.getElementById('outputCode').value +
+               '\n' + document.getElementById('sandboxOutput').value +
+               '\n' + document.getElementById('inputCode').value;
+
+  if (!source.trim()) { log('nothing to extract from — deobfuscate first', 'log-err'); return; }
+
+  var found = [];
+  var seen = new Set();
+
+  // 1. Standard URLs
+  var urlRe = /https?:\/\/[^\s"'<>\)\(,\[\]{}\\]+/gi;
+  var m;
+  while ((m = urlRe.exec(source)) !== null) {
+    var url = m[0].replace(/[.,;:!?]+$/, '');
+    if (!seen.has(url)) { seen.add(url); found.push({ url: url, type: 'http' }); }
+  }
+
+  // 2. WebSocket URLs
+  var wsRe = /wss?:\/\/[^\s"'<>\)\(,\[\]{}\\]+/gi;
+  while ((m = wsRe.exec(source)) !== null) {
+    var wsurl = m[0].replace(/[.,;:!?]+$/, '');
+    if (!seen.has(wsurl)) { seen.add(wsurl); found.push({ url: wsurl, type: 'ws' }); }
+  }
+
+  // 3. FTP URLs
+  var ftpRe = /ftp:\/\/[^\s"'<>\)\(,\[\]{}\\]+/gi;
+  while ((m = ftpRe.exec(source)) !== null) {
+    var ftpurl = m[0].replace(/[.,;:!?]+$/, '');
+    if (!seen.has(ftpurl)) { seen.add(ftpurl); found.push({ url: ftpurl, type: 'http' }); }
+  }
+
+  // 4. Decode base64 chunks and scan for embedded URLs
+  var b64Re = /[A-Za-z0-9+\/=]{30,}/g;
+  while ((m = b64Re.exec(source)) !== null) {
+    try {
+      var decoded = atob(m[0]);
+      if (/https?:\/\//.test(decoded)) {
+        var inner = decoded.match(/https?:\/\/[^\s"'<>]+/gi) || [];
+        inner.forEach(function(u) {
+          u = u.replace(/[.,;:!?]+$/, '');
+          if (!seen.has(u)) { seen.add(u); found.push({ url: u, type: 'suspicious' }); }
+        });
+      }
+    } catch(e) {}
+  }
+
+  // 5. URL-encoded strings
+  var pctRe = /(https?%3A%2F%2F[^\s"'<>&]+)/gi;
+  while ((m = pctRe.exec(source)) !== null) {
+    try {
+      var dec = decodeURIComponent(m[0]);
+      if (!seen.has(dec)) { seen.add(dec); found.push({ url: dec, type: 'suspicious' }); }
+    } catch(e) {}
+  }
+
+  // 6. Unicode-escaped URLs (\u0068\u0074\u0074\u0070)
+  var uniDecoded = source.replace(/\\u([0-9a-fA-F]{4})/g, function(_,c){ return String.fromCharCode(parseInt(c,16)); });
+  var uniUrls = uniDecoded.match(/https?:\/\/[^\s"'<>]+/gi) || [];
+  uniUrls.forEach(function(u) {
+    u = u.replace(/[.,;:!?]+$/, '');
+    if (!seen.has(u)) { seen.add(u); found.push({ url: u, type: 'suspicious' }); }
+  });
+
+  extractedURLs = found;
+  renderURLList(found);
+
+  if (found.length > 0) {
+    log('URL extractor: ' + found.length + ' URL(s) found', 'log-ok');
+  } else {
+    log('URL extractor: no URLs found', 'log-warn');
+  }
+}
+
+function autoExtractIfURLsFound(text) {
+  if (/https?:\/\//.test(text)) extractURLs();
+}
+
+function renderURLList(urls) {
+  var list = document.getElementById('urlList');
+  if (urls.length === 0) {
+    list.innerHTML = '<div class="url-empty">No URLs found in decoded output</div>';
+    return;
+  }
+
+  var typeCount = { http: 0, ws: 0, suspicious: 0 };
+  urls.forEach(function(u) { typeCount[u.type] = (typeCount[u.type]||0) + 1; });
+
+  var statsHtml = '<div class="url-stats">' +
+    urls.length + ' URL(s) found &mdash; ' +
+    (typeCount.http ? '<span style="color:#2e7d32">' + typeCount.http + ' http</span> ' : '') +
+    (typeCount.ws   ? '<span style="color:#6a1b9a">' + typeCount.ws   + ' websocket</span> ' : '') +
+    (typeCount.suspicious ? '<span style="color:#b71c1c">' + typeCount.suspicious + ' embedded/encoded ⚠</span>' : '') +
+    '</div>';
+
+  var itemsHtml = urls.map(function(u, i) {
+    var tagClass = 'tag-' + u.type;
+    var tagLabel = u.type === 'suspicious' ? '⚠ ENCODED' : u.type.toUpperCase();
+    return '<div class="url-item">' +
+      '<span class="url-tag ' + tagClass + '">' + tagLabel + '</span>' +
+      '<a href="' + u.url + '" target="_blank" rel="noopener noreferrer">' + u.url + '</a>' +
+      '<button class="url-copy" onclick="copyURL(' + i + ')">Copy</button>' +
+      '</div>';
+  }).join('');
+
+  list.innerHTML = statsHtml + itemsHtml;
+}
+
+function copyURL(index) {
+  if (extractedURLs[index]) {
+    navigator.clipboard.writeText(extractedURLs[index].url)
+      .then(function(){ log('URL copied: ' + extractedURLs[index].url, 'log-ok'); });
+  }
+}
+
+function copyAllURLs() {
+  if (!extractedURLs.length) { log('no URLs to copy — run extractor first', 'log-warn'); return; }
+  var text = extractedURLs.map(function(u){ return u.url; }).join('\n');
+  navigator.clipboard.writeText(text).then(function(){
+    log('all ' + extractedURLs.length + ' URLs copied to clipboard', 'log-ok');
+  });
+}
+
+function runDecrypt() {
+  var input = document.getElementById('inputCode').value;
+  if (!input.trim()) { log('no input provided', 'log-err'); return; }
+  if (input.length > MAX_SIZE) { log('ERROR: exceeds 2MB', 'log-err'); return; }
+
+  var opts = {
+    beautify: document.getElementById('togBeautify').checked,
+    rename:   document.getElementById('togRename').checked,
+    evalHex:  document.getElementById('togHex').checked,
+    deadCode: document.getElementById('togDead').checked
+  };
+
+  setUIBusy(true);
+  setProgress(3, 'Starting worker...');
+  document.getElementById('detectionBadge').classList.remove('visible');
+  log('input: ' + (input.length/1024).toFixed(1) + 'KB | method: ' + selectedMethod);
+
+  var isLarge = input.length > 51200;
+
+  // Read worker code from the <script type="text/js-worker"> tag — zero escaping issues
+  var workerSrc = document.getElementById('workerCode').textContent;
+  var blob = new Blob([workerSrc], {type:'application/javascript'});
+  var url  = URL.createObjectURL(blob);
+  var worker = new Worker(url);
+  currentWorker = worker;
+
+  worker.onmessage = function(e) {
+    var data = e.data;
+    if      (data.type === 'log')       log(data.msg);
+    else if (data.type === 'log-ok')    log(data.msg, 'log-ok');
+    else if (data.type === 'log-warn')  log(data.msg, 'log-warn');
+    else if (data.type === 'log-err')   log(data.msg, 'log-err');
+    else if (data.type === 'log-clean') log(data.msg, 'log-clean');
+    else if (data.type === 'done')      setProgress(100, 'Done!');
+    else if (data.type === 'result') {
+      document.getElementById('outputCode').value   = data.output;
+      document.getElementById('statLayers').textContent = data.layers;
+      document.getElementById('statDead').textContent   = data.deadRemoved || 0;
+      document.getElementById('statOut').textContent    = data.output.length.toLocaleString();
+
+      if (data.badge && data.badge.length) {
+        document.getElementById('detectionBadge').classList.add('visible');
+        var decodeTags = ['base64','hex','url','unicode','html-entities','rot13','binary','octal','morse','atbash','caesar','xor','packed','brainfuck'];
+        var dec = data.badge.filter(function(b){ return decodeTags.indexOf(b) !== -1; });
+        var cln = data.badge.filter(function(b){ return decodeTags.indexOf(b) === -1; });
+        var html = '';
+        if (dec.length) html += '<span class="badge-label">🔓 Decoded</span>' + dec.map(function(l){ return '<span class="layer-tag">'+l+'</span>'; }).join('');
+        if (cln.length) html += '<span class="badge-label" style="margin-top:8px;display:block;">✨ Cleaned</span>' + cln.map(function(l){ return '<span class="layer-tag clean-tag">'+l+'</span>'; }).join('');
+        document.getElementById('detectedLayers').innerHTML = html;
+      }
+
+      log('done · ' + data.layers + ' decode layer(s) · ' + (data.deadRemoved||0) + ' dead lines removed · out: ' + data.output.length.toLocaleString() + ' chars', 'log-ok');
+      setTimeout(hideProgress, 1500);
+      setUIBusy(false);
+      worker.terminate(); URL.revokeObjectURL(url); currentWorker = null;
+    }
+    if (data.pct != null) setProgress(data.pct);
+  };
+
+  worker.onerror = function(err) {
+    log('worker error: ' + err.message, 'log-err');
+    hideProgress(); setUIBusy(false);
+    worker.terminate(); URL.revokeObjectURL(url); currentWorker = null;
+  };
+
+  worker.postMessage({ input: input, method: selectedMethod, isLarge: isLarge, opts: opts });
+}
+</script>
+</body>
+</html>
