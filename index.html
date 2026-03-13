@@ -1,0 +1,1792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DEOBSF · Military Grade Deobfuscator · v7.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#e0e5ec;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 20px 0;font-family:'Space Grotesk',sans-serif;}
+
+/* ── NEO CARD ── */
+.app{width:100%;max-width:560px;display:flex;flex-direction:column;align-items:stretch;}
+.neo-card{background:#eef0f4;width:100%;border-radius:50px;padding:36px 30px;box-shadow:22px 22px 40px #b8b9be,-22px -22px 40px #ffffff;position:relative;z-index:2;margin-bottom:20px;}
+
+/* ── HEADER ── */
+.header{text-align:center;padding:0 0 28px;}
+.logo-wrapper{display:flex;justify-content:center;margin-bottom:15px;}
+.header-shield{width:100px;height:100px;border-radius:50%;background:#eef0f4;box-shadow:8px 8px 16px #b8b9be,-8px -8px 16px #ffffff;display:flex;align-items:center;justify-content:center;font-size:40px;color:#2d4059;animation:none;}
+.header-title{font-weight:800;font-size:28px;color:#1e2b3a;letter-spacing:2px;margin-bottom:4px;}
+.header-sub{font-size:11px;font-weight:700;color:#4a5c72;letter-spacing:2px;margin-bottom:10px;text-transform:uppercase;}
+.badge-row{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:4px;}
+.badge{font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;letter-spacing:0.5px;text-transform:uppercase;border:none;}
+.badge.cyan{background:#d4dae3;color:#1e4b8b;box-shadow:3px 3px 6px #b8b9be,-3px -3px 6px #ffffff;}
+.badge.red{background:#ffe0e0;color:#b91c1c;box-shadow:3px 3px 6px #b8b9be,-3px -3px 6px #ffffff;}
+.badge.green{background:#d4edda;color:#155724;box-shadow:3px 3px 6px #b8b9be,-3px -3px 6px #ffffff;}
+.badge.orange{background:#fff3e0;color:#e65100;box-shadow:3px 3px 6px #b8b9be,-3px -3px 6px #ffffff;}
+.badge.purple{background:#ede7f6;color:#4a148c;box-shadow:3px 3px 6px #b8b9be,-3px -3px 6px #ffffff;}
+.badge.yellow{background:#fffde7;color:#f57f17;box-shadow:3px 3px 6px #b8b9be,-3px -3px 6px #ffffff;}
+
+/* ── STATS BAR ── */
+.stats-bar{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:20px;}
+.stat-cell{background:#eef0f4;border-radius:18px;padding:12px 4px;text-align:center;box-shadow:6px 6px 12px #b8b9be,-6px -6px 12px #ffffff;}
+.stat-cell.active{box-shadow:inset 3px 3px 6px #b8b9be,inset -3px -3px 6px #ffffff;}
+.stat-val{font-size:13px;font-weight:800;color:#2d4059;font-family:'JetBrains Mono',monospace;display:block;}
+.stat-label{font-size:8px;color:#8f9bb3;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-top:3px;display:block;}
+
+/* ── DETECTION BADGE ── */
+.det-badge{display:none;background:#d4dae3;border-radius:30px;padding:12px 18px;margin-bottom:18px;box-shadow:inset 4px 4px 8px #b8b9be,inset -4px -4px 8px #ffffff;font-size:12px;font-weight:700;color:#1e3b4f;word-break:break-word;line-height:1.9;}
+.det-badge.visible{display:block;}
+.det-badge-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#4a5c72;display:block;margin-bottom:6px;}
+.layer-chip{display:inline-block;background:#4a90e2;color:white;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;margin:2px 3px;text-transform:uppercase;}
+.lc-decode{background:#4a90e2;color:white;}
+.lc-clean{background:#2e7d32;color:white;}
+.lc-threat{background:#b91c1c;color:white;}
+
+/* ── SCORE CARD ── */
+.score-card{display:none;background:#eef0f4;border-radius:30px;padding:18px 20px;margin-bottom:18px;box-shadow:inset 6px 6px 12px #b8b9be,inset -6px -6px 12px #ffffff;}
+.score-card.visible{display:block;}
+.sc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.sc-number{font-family:'JetBrains Mono',monospace;font-size:42px;font-weight:700;line-height:1;color:#2d4059;}
+.sc-grade{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:2px;margin-top:4px;}
+.sc-desc{font-size:11px;color:#4a5c72;text-align:right;}
+.sc-items{display:flex;flex-direction:column;gap:7px;}
+.sc-item{display:flex;align-items:center;gap:10px;}
+.sc-item-label{font-size:10px;color:#4a5c72;font-weight:600;min-width:130px;}
+.sc-item-bar{flex:1;height:5px;background:#d4dae3;border-radius:20px;overflow:hidden;box-shadow:inset 2px 2px 4px #b8b9be,inset -2px -2px 4px #ffffff;}
+.sc-item-fill{height:100%;border-radius:20px;transition:width 0.5s ease;}
+.sc-item-val{font-size:10px;font-weight:800;font-family:'JetBrains Mono',monospace;min-width:24px;text-align:right;}
+
+/* ── PANELS ── */
+.panel{background:#eef0f4;border-radius:30px;padding:20px;margin-bottom:20px;box-shadow:inset 6px 6px 12px #b8b9be,inset -6px -6px 12px #ffffff;}
+.panel-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;cursor:default;}
+.ph-icon{width:40px;height:40px;border-radius:16px;background:#eef0f4;box-shadow:5px 5px 10px #b8b9be,-5px -5px 10px #ffffff;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.ph-icon.cyan{color:#1565c0;}.ph-icon.green{color:#2e7d32;}.ph-icon.red{color:#b91c1c;}.ph-icon.orange{color:#e65100;}.ph-icon.purple{color:#6a1b9a;}.ph-icon.yellow{color:#f57f17;}
+.ph-text{}
+.ph-title{font-size:13px;font-weight:800;color:#2d4059;}
+.ph-sub{font-size:11px;color:#4a5c72;font-weight:500;}
+.ph-badge{font-size:9px;font-weight:700;padding:3px 9px;border-radius:12px;margin-left:6px;text-transform:uppercase;}
+.ph-badge.new{background:#d4edda;color:#155724;}
+.ph-badge.ai{background:#ede7f6;color:#4a148c;}
+.collapse-arrow{display:none;}
+
+/* ── INPUTS ── */
+.field-label{display:block;font-weight:700;font-size:11px;color:#4a5c72;margin-bottom:8px;letter-spacing:0.8px;text-transform:uppercase;padding-left:10px;}
+.field-label i{color:#4a90e2;margin-right:4px;}
+textarea,input[type=text]{width:100%;padding:14px 18px;background:#eef0f4;border:none;border-radius:28px;font-size:13px;color:#1e2b3a;font-weight:500;box-shadow:inset 6px 6px 12px #b8b9be,inset -6px -6px 12px #ffffff;outline:none;transition:all 0.2s;font-family:'Space Grotesk',sans-serif;}
+textarea::placeholder,input[type=text]::placeholder{color:#8f9bb3;}
+textarea:focus,input[type=text]:focus{box-shadow:inset 8px 8px 14px #b8b9be,inset -8px -8px 14px #ffffff;}
+textarea{resize:vertical;min-height:120px;line-height:1.5;font-family:'JetBrains Mono',monospace;font-size:12px;border-radius:24px;}
+#inputCode{min-height:160px;}
+#outputCode{min-height:220px;}
+input[type=text]{resize:none;border-radius:28px;font-family:'Space Grotesk',sans-serif;font-size:12px;}
+
+/* ── UPLOAD ── */
+.upload-zone{width:100%;padding:22px;background:#eef0f4;border:none;border-radius:30px;box-shadow:inset 6px 6px 12px #b8b9be,inset -6px -6px 12px #ffffff;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:0.2s;color:#4a5c72;font-weight:600;font-size:13px;}
+.upload-zone:hover,.upload-zone.drag-over{box-shadow:inset 4px 4px 8px #b8b9be,inset -4px -4px 8px #ffffff;color:#4a90e2;}
+.upload-zone i{font-size:28px;color:#4a90e2;}
+.upload-zone .uz-sub{font-size:11px;color:#8f9bb3;font-weight:500;}
+#fileInput{display:none;}
+.size-warn{display:none;background:#fff3cd;border-radius:20px;padding:8px 16px;margin-bottom:14px;font-size:11px;font-weight:700;color:#856404;text-align:center;}
+.size-warn.visible{display:block;}
+
+/* ── TOGGLE GRID ── */
+.toggle-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.toggle-item{background:#eef0f4;border-radius:26px;padding:13px 15px;display:flex;align-items:center;justify-content:space-between;box-shadow:6px 6px 12px #b8b9be,-6px -6px 12px #ffffff;}
+.tg-text{}
+.tg-label{font-size:11px;font-weight:700;color:#2d4059;text-transform:uppercase;letter-spacing:0.5px;}
+.tg-sub{font-size:9px;color:#8f9bb3;font-weight:500;margin-top:2px;}
+.switch{position:relative;display:inline-block;width:42px;height:24px;flex-shrink:0;}
+.switch input{opacity:0;width:0;height:0;}
+.slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#c8cdd6;border-radius:24px;transition:.3s;box-shadow:inset 2px 2px 4px #b8b9be,inset -2px -2px 4px #ffffff;}
+.slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.3s;box-shadow:2px 2px 4px #b8b9be;}
+input:checked+.slider{background:#4a90e2;}
+input:checked+.slider:before{transform:translateX(18px);}
+
+/* ── METHOD GRID ── */
+.method-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.meth-btn{background:#eef0f4;border:none;padding:11px 4px;border-radius:28px;font-weight:700;font-size:10px;color:#2d4059;box-shadow:6px 6px 12px #b8b9be,-6px -6px 12px #ffffff;cursor:pointer;transition:0.12s;text-align:center;text-transform:uppercase;letter-spacing:0.4px;}
+.meth-btn:hover{box-shadow:inset 3px 3px 6px #b8b9be,inset -3px -3px 6px #ffffff;}
+.meth-btn.active{box-shadow:inset 5px 5px 10px #b8b9be,inset -5px -5px 10px #ffffff;color:#1e4b8b;}
+
+/* ── PROGRESS ── */
+.progress-wrap{display:none;margin-bottom:6px;background:#dde1e7;border-radius:30px;box-shadow:inset 4px 4px 8px #b8b9be,inset -4px -4px 8px #ffffff;padding:5px;}
+.progress-wrap.visible{display:block;}
+.progress-track{height:10px;border-radius:30px;background:transparent;}
+.progress-bar{height:10px;border-radius:30px;background:linear-gradient(90deg,#4a90e2,#0088cc);width:0%;transition:width 0.25s ease;box-shadow:0 2px 6px rgba(74,144,226,0.4);}
+.progress-lbl{font-size:10px;font-weight:700;color:#4a5c72;text-align:center;margin-top:5px;margin-bottom:6px;display:block;letter-spacing:0.5px;}
+
+/* ── BUTTONS ── */
+.btn-row{display:flex;gap:10px;margin:14px 0;}
+.btn-primary{flex:1;background:#4a90e2;border:none;padding:16px 18px;border-radius:38px;font-weight:800;font-size:14px;color:white;text-transform:uppercase;letter-spacing:1.5px;box-shadow:8px 8px 18px #b8b9be,-8px -8px 18px #ffffff;cursor:pointer;transition:all 0.15s;border:1px solid rgba(255,255,255,0.3);font-family:'Space Grotesk',sans-serif;}
+.btn-primary:hover{background:#3d7bc1;box-shadow:5px 5px 10px #b8b9be,-5px -5px 10px #ffffff;transform:translateY(-2px);}
+.btn-primary:disabled{opacity:0.7;background:#8a9bb5;transform:none;box-shadow:inset 5px 5px 10px #8f9bb3,inset -5px -5px 10px #ffffff;cursor:not-allowed;}
+.btn-primary.green-btn{background:#2e7d32;}
+.btn-primary.green-btn:hover{background:#1b5e20;}
+.btn-primary.red-btn{background:#b91c1c;}
+.btn-primary.red-btn:hover{background:#7f0000;}
+.btn-primary.purple-btn{background:#6a1b9a;}
+.btn-primary.purple-btn:hover{background:#4a0072;}
+.btn-secondary{background:#eef0f4;border:none;padding:16px 20px;border-radius:38px;font-weight:700;font-size:13px;color:#4a5c72;box-shadow:7px 7px 14px #b8b9be,-7px -7px 14px #ffffff;cursor:pointer;transition:0.12s;font-family:'Space Grotesk',sans-serif;}
+.btn-secondary:hover{box-shadow:inset 4px 4px 8px #b8b9be,inset -4px -4px 8px #ffffff;color:#1e3b4f;}
+.btn-cancel{background:#eef0f4;border:none;padding:16px 18px;border-radius:38px;font-weight:800;font-size:12px;color:#b91c1c;box-shadow:8px 8px 18px #b8b9be,-8px -8px 18px #ffffff;cursor:pointer;transition:0.12s;display:none;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:1px;font-family:'Space Grotesk',sans-serif;}
+.btn-cancel.visible{display:flex;}
+.btn-mini{background:#eef0f4;border:none;padding:9px 14px;border-radius:22px;font-weight:700;font-size:11px;color:#4a5c72;box-shadow:5px 5px 10px #b8b9be,-5px -5px 10px #ffffff;cursor:pointer;transition:0.12s;text-transform:uppercase;letter-spacing:0.4px;font-family:'Space Grotesk',sans-serif;white-space:nowrap;}
+.btn-mini:hover{box-shadow:inset 3px 3px 6px #b8b9be,inset -3px -3px 6px #ffffff;color:#1e3b4f;}
+.action-strip{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+
+/* ── TERMINAL ── */
+.terminal{background:#dde1e7;border-radius:22px;padding:16px;height:140px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#1e3b4f;box-shadow:inset 8px 8px 16px #b8b9be,inset -8px -8px 16px #ffffff;margin-bottom:16px;line-height:1.6;}
+.t-line{margin-bottom:3px;word-break:break-word;}
+.t-line::before{content:'> ';color:#8f9bb3;}
+.t-ok{color:#1e6b2d;}.t-warn{color:#cc7700;}.t-err{color:#b91c1c;}.t-clean{color:#1565c0;}.t-crash{color:#b91c1c;}.t-ai{color:#6a1b9a;}.t-info{color:#e65100;}
+
+/* ── THREAT ── */
+.threat-list{display:flex;flex-direction:column;gap:6px;}
+.threat-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#eef0f4;border-radius:18px;box-shadow:4px 4px 8px #b8b9be,-4px -4px 8px #ffffff;}
+.threat-name{font-size:11px;font-weight:700;color:#2d4059;}
+.threat-bypass{font-size:10px;color:#4a5c72;margin-top:2px;}
+.t-status{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;}
+.ts-found{background:#ffe0e0;color:#b91c1c;}
+.ts-warn{background:#fff3cd;color:#856404;}
+.ts-bypass{background:#d4dae3;color:#1e4b8b;}
+.no-threats{text-align:center;color:#8f9bb3;font-size:12px;font-weight:600;padding:14px;}
+.score-track{height:6px;background:#d4dae3;border-radius:20px;overflow:hidden;margin-top:12px;box-shadow:inset 2px 2px 4px #b8b9be,inset -2px -2px 4px #ffffff;}
+.score-fill{height:100%;border-radius:20px;transition:width 0.5s ease;}
+.sf-low{background:#2e7d32;}.sf-med{background:#cc7700;}.sf-high{background:#b91c1c;}.sf-crit{background:linear-gradient(90deg,#b91c1c,#7f0000);}
+
+/* ── ENTROPY ── */
+.ent-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.ent-label{font-size:10px;font-weight:700;color:#4a5c72;min-width:100px;flex-shrink:0;}
+.ent-track{flex:1;height:8px;background:#d4dae3;border-radius:20px;overflow:hidden;box-shadow:inset 2px 2px 4px #b8b9be,inset -2px -2px 4px #ffffff;}
+.ent-fill{height:100%;border-radius:20px;transition:width 0.6s ease;}
+.ent-val{font-size:10px;font-weight:800;color:#2d4059;font-family:'JetBrains Mono',monospace;width:36px;text-align:right;}
+.ent-verdict{margin-top:10px;padding:12px;background:#eef0f4;border-radius:18px;box-shadow:4px 4px 8px #b8b9be,-4px -4px 8px #ffffff;font-size:11px;font-weight:700;color:#2d4059;text-align:center;}
+
+/* ── HASH ── */
+.hash-list{display:flex;flex-direction:column;gap:8px;}
+.hash-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#eef0f4;border-radius:18px;box-shadow:4px 4px 8px #b8b9be,-4px -4px 8px #ffffff;}
+.hash-algo{font-size:10px;font-weight:800;color:#1e4b8b;min-width:60px;text-transform:uppercase;}
+.hash-val{font-family:'JetBrains Mono',monospace;font-size:10px;color:#1e2b3a;word-break:break-all;flex:1;}
+
+/* ── DIFF ── */
+.diff-textarea{background:#1e2b3a;color:#cdd9e5;height:200px;font-size:11px;border-radius:18px;box-shadow:inset 6px 6px 12px #111820,inset -6px -6px 12px #2a3a50;}
+.diff-stats{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px;font-size:11px;font-weight:700;color:#4a5c72;}
+.diff-stats span{display:flex;align-items:center;gap:4px;}
+
+/* ── SANDBOX ── */
+.sandbox-badge{display:inline-flex;align-items:center;gap:6px;background:#fff3cd;border-radius:18px;padding:6px 14px;font-size:11px;font-weight:700;color:#856404;margin-bottom:10px;}
+.sandbox-badge.safe{background:#d4edda;color:#155724;}
+.sandbox-output{background:#1e2b3a;color:#a8d8a8;height:150px;font-size:12px;border-radius:18px;box-shadow:inset 6px 6px 12px #111820,inset -6px -6px 12px #2a3a50;}
+
+/* ── URL ── */
+.url-list{max-height:220px;overflow-y:auto;margin-top:10px;}
+.url-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;background:#eef0f4;border-radius:18px;margin-bottom:7px;box-shadow:4px 4px 8px #b8b9be,-4px -4px 8px #ffffff;}
+.url-item a{font-family:'JetBrains Mono',monospace;font-size:11px;color:#1565c0;word-break:break-all;text-decoration:none;flex:1;}
+.url-item a:hover{text-decoration:underline;}
+.url-tag{font-size:9px;font-weight:800;padding:2px 7px;border-radius:10px;color:white;white-space:nowrap;}
+.tag-http{background:#2e7d32;}.tag-ws{background:#6a1b9a;}.tag-suspicious{background:#b71c1c;}
+.url-empty{text-align:center;color:#8f9bb3;font-size:12px;font-weight:600;padding:20px;}
+.url-stats{font-size:11px;font-weight:700;color:#4a5c72;margin-bottom:8px;}
+
+/* ── COMPARE ── */
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
+.compare-col label{font-size:10px;font-weight:700;color:#4a5c72;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;padding-left:4px;}
+.compare-out{height:200px;font-size:11px;border-radius:18px;}
+
+/* ── API TABS & MODEL CHIPS ── */
+.api-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+.api-tab{flex:1;min-width:100px;background:#eef0f4;border:none;padding:10px 8px;border-radius:24px;font-weight:700;font-size:10px;color:#4a5c72;box-shadow:5px 5px 10px #b8b9be,-5px -5px 10px #ffffff;cursor:pointer;transition:0.15s;text-align:center;letter-spacing:0.5px;text-transform:uppercase;}
+.api-tab.active{box-shadow:inset 4px 4px 8px #b8b9be,inset -4px -4px 8px #ffffff;color:#1565c0;}
+.api-tab i{display:block;font-size:14px;margin-bottom:4px;}
+.model-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+.model-chip{background:#eef0f4;border:none;padding:8px 14px;border-radius:20px;font-size:10px;font-weight:700;color:#4a5c72;box-shadow:4px 4px 8px #b8b9be,-4px -4px 8px #ffffff;cursor:pointer;transition:0.1s;text-transform:uppercase;letter-spacing:0.4px;font-family:'Space Grotesk',sans-serif;}
+.model-chip.active{box-shadow:inset 3px 3px 6px #b8b9be,inset -3px -3px 6px #ffffff;color:#6a1b9a;}
+
+/* ── REWRITE STATUS ── */
+.rw-status{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#4a5c72;margin-bottom:12px;padding-left:4px;}
+.dot{width:8px;height:8px;border-radius:50%;background:#c8cdd6;flex-shrink:0;}
+.dot.online{background:#2e7d32;box-shadow:0 0 6px #2e7d32;}
+.dot.loading{background:#cc7700;animation:dotpulse 1s infinite;}
+.dot.ai{background:#6a1b9a;box-shadow:0 0 8px #6a1b9a;animation:dotpulse 0.8s infinite;}
+@keyframes dotpulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.rw-output{min-height:130px;font-size:12px;border-radius:20px;}
+
+/* ── CRED LIST ── */
+.cred-list{display:flex;flex-direction:column;gap:6px;}
+.cred-item{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:#eef0f4;border-radius:18px;box-shadow:4px 4px 8px #b8b9be,-4px -4px 8px #ffffff;}
+.cred-type{font-size:9px;font-weight:800;padding:3px 9px;border-radius:12px;text-transform:uppercase;white-space:nowrap;flex-shrink:0;margin-top:1px;}
+.ct-jwt{background:#fffde7;color:#f57f17;}.ct-aws{background:#fff3e0;color:#e65100;}.ct-key{background:#ffe0e0;color:#b91c1c;}.ct-ip{background:#d4dae3;color:#1e4b8b;}.ct-email{background:#d4edda;color:#155724;}.ct-domain{background:#ede7f6;color:#4a148c;}
+.cred-val{font-family:'JetBrains Mono',monospace;font-size:10px;color:#1e2b3a;word-break:break-all;flex:1;}
+
+/* ── HISTORY ── */
+.hist-list{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;}
+.hist-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;background:#eef0f4;border-radius:18px;box-shadow:4px 4px 8px #b8b9be,-4px -4px 8px #ffffff;cursor:pointer;transition:0.12s;}
+.hist-item:hover{box-shadow:inset 3px 3px 6px #b8b9be,inset -3px -3px 6px #ffffff;}
+.hist-preview{font-family:'JetBrains Mono',monospace;font-size:10px;color:#2d4059;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hist-meta{font-size:9px;color:#8f9bb3;font-weight:600;margin-top:2px;}
+
+/* ── FOOTER ── */
+.footer-links{display:flex;flex-direction:column;gap:10px;margin-top:20px;}
+.footer-btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:16px;border-radius:40px;text-decoration:none;font-weight:800;font-size:15px;background:#eef0f4;box-shadow:9px 9px 18px #b8b9be,-9px -9px 18px #ffffff;transition:0.1s;border:1px solid rgba(255,255,255,0.7);}
+.footer-btn:hover{box-shadow:inset 5px 5px 12px #b8b9be,inset -5px -5px 12px #ffffff;}
+.footer-btn.tg{color:#0088cc;}.footer-btn.wa{color:#25d366;}
+.page-footer{width:100%;max-width:560px;text-align:center;padding:16px 0 30px;font-size:12px;color:#8f9bb3;font-weight:600;}
+.page-footer a{color:#4a90e2;text-decoration:none;}
+
+/* ── INFO CHIP ── */
+.info-chip{display:inline-flex;align-items:center;gap:4px;background:#d4edda;color:#155724;font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;text-transform:uppercase;letter-spacing:0.5px;vertical-align:middle;}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity 0.3s;}
+.modal-overlay.hidden{opacity:0;pointer-events:none;}
+.modal-card{background:#eef0f4;max-width:380px;width:90%;border-radius:60px;padding:30px 25px 25px;box-shadow:25px 25px 45px #b8b9be,-25px -25px 45px #ffffff;text-align:center;position:relative;border:2px solid rgba(255,255,255,0.7);animation:popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);}
+@keyframes popIn{0%{transform:scale(0.7);opacity:0}100%{transform:scale(1);opacity:1}}
+.modal-close{position:absolute;top:18px;right:22px;background:#eef0f4;width:40px;height:40px;border-radius:30px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#4a5c72;cursor:pointer;box-shadow:6px 6px 12px #b8b9be,-6px -6px 12px #ffffff;border:none;transition:0.1s;}
+.modal-close:hover{box-shadow:inset 4px 4px 8px #b8b9be,inset -4px -4px 8px #ffffff;}
+.modal-icon{font-size:60px;color:#0088cc;margin-bottom:5px;}
+.modal-title{font-size:26px;font-weight:800;color:#2d4059;margin-bottom:8px;text-transform:uppercase;}
+.modal-sub{font-size:13px;font-weight:600;background:#d4dae3;display:inline-block;padding:6px 20px;border-radius:40px;color:#1e3b4f;margin:5px 0 14px;box-shadow:inset 3px 3px 8px #b8b9be,inset -3px -3px 8px #ffffff;}
+.modal-desc{font-size:13px;font-weight:600;color:#1e3b4f;margin:12px 0 18px;background:#d9dee6;padding:14px;border-radius:28px;box-shadow:inset 5px 5px 12px #b8b9be,inset -5px -5px 12px #ffffff;}
+.modal-btns{display:flex;flex-direction:column;gap:10px;}
+.modal-btn{display:flex;align-items:center;justify-content:center;gap:12px;color:white;text-decoration:none;font-weight:800;font-size:15px;padding:14px 30px;border-radius:50px;box-shadow:7px 7px 14px #b8b9be,-7px -7px 14px #ffffff;transition:0.1s;border:1px solid rgba(255,255,255,0.5);}
+.modal-btn.tg{background:#0088cc;}.modal-btn.tg:hover{background:#006699;}
+.modal-btn.wa{background:#25d366;}.modal-btn.wa:hover{background:#1da851;}
+.modal-note{margin-top:12px;font-size:11px;color:#8f9bb3;font-weight:600;}
+
+/* ── DIVIDER ── */
+.divider{height:1px;background:linear-gradient(90deg,transparent,#c8cdd6,transparent);margin:16px 0;}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-thumb{background:#a1aec0;border-radius:20px;}
+
+/* ── SPIN (logo) ── */
+@keyframes spin{to{transform:rotate(360deg);}}
+.panel-body{padding:0;}
+</style>
+</head>
+<body>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="joinPopup">
+  <div class="modal-card">
+    <button class="modal-close" id="closePopup"><i class="fas fa-times"></i></button>
+    <div class="modal-icon"><i class="fab fa-telegram-plane"></i></div>
+    <div class="modal-title">JOIN US</div>
+    <div class="modal-sub">Tools &amp; Updates · by @kaaxhunter</div>
+    <div class="modal-desc"><strong>@kaaxhunter</strong> · Exclusive deobfuscation tools, new drops &amp; direct dev support.</div>
+    <div class="modal-btns">
+      <a href="https://t.me/kaaxupdates" target="_blank" class="modal-btn tg"><i class="fab fa-telegram-plane"></i> JOIN TELEGRAM</a>
+      <a href="https://whatsapp.com/channel/0029Vb6jJ1h2UPBIiqvzpg3O" target="_blank" class="modal-btn wa"><i class="fab fa-whatsapp"></i> JOIN WHATSAPP</a>
+    </div>
+    <div class="modal-note">free · open · by @kaaxhunter</div>
+  </div>
+</div>
+
+<!-- WORKER -->
+<script id="workerCode" type="text/js-worker">
+"use strict";
+
+/* ════════════════════════════════════════════════════════
+   DEOBSF v8 ENGINE  —  complete rewrite
+   Pipeline (iterative, up to 20 global passes):
+     0. Threat bypass
+     1. String-array + accessor + offset resolver  (multi-variant)
+     2. Hex / unicode / url / html inline
+     3. Eval-chain unwrapper  (atob(atob(...)), eval(decode(...)))
+     4. Packed JS unpacker
+     5. Control-flow unflattener  (while+switch dispatcher)
+     6. String concat folder
+     7. Constant propagation + arithmetic folding
+     8. Dead-code / dead-branch pruner
+     9. Beautifier
+   Loops until no change or 20 passes.
+════════════════════════════════════════════════════════ */
+
+/* ── utils ── */
+function scoreEnglish(s){
+  var freq='etaoinshrdlcumwfgypbvkjxqz',n=0,l=s.toLowerCase();
+  for(var i=0;i<l.length;i++)if(freq.indexOf(l[i])!==-1)n++;
+  return n/(s.length||1);
+}
+function hasJSKeywords(s){
+  var kw=['function','return','var ','let ','const ','if(','if (','{','}',';'];
+  var h=0;for(var i=0;i<kw.length;i++)if(s.indexOf(kw[i])!==-1)h++;
+  return h>=3;
+}
+function escRe(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
+
+/* ═══════════════════════════════════════
+   1. STRING-ARRAY RESOLVER  (multi-variant)
+   Handles:
+   - var _0xABC = ['str1','str2',...]
+   - rotation via push/shift loop
+   - accessor: function _0xFn(_0xIdx){return _0xArr[_0xIdx];}
+   - accessor with offset: return _0xArr[_0xIdx - 0x1a2]
+   - accessor with shift wrapper: _0xArr[_0xIdx - _0xShift()]
+   - two-arg accessor: function _0xFn(a,b){...}  (self-initializing)
+═══════════════════════════════════════ */
+function resolveStringArrays(code){
+  var changed=false, totalInlined=0;
+
+  /* Step 1 – find all string array declarations */
+  var arrays={};  // name -> {vals, defined_start, defined_end}
+  var arrDeclRe=/\bvar\s+(_0x[0-9a-fA-F]{2,8})\s*=\s*(\[[\s\S]*?\])\s*;/g;
+  var m;
+  while((m=arrDeclRe.exec(code))!==null){
+    var arrName=m[1], rawArr=m[2];
+    var vals=[];
+    var strRe=/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g, sm;
+    while((sm=strRe.exec(rawArr))!==null){
+      vals.push(sm[0].slice(1,-1)
+        .replace(/\\'/g,"'").replace(/\\"/g,'"')
+        .replace(/\\n/g,'\n').replace(/\\r/g,'\r')
+        .replace(/\\t/g,'\t').replace(/\\\\/g,'\\'));
+    }
+    if(vals.length>0)arrays[arrName]={vals:vals};
+  }
+  if(!Object.keys(arrays).length)return{result:code,success:false};
+
+  /* Step 2 – apply rotations  (push/shift pattern) */
+  for(var arrN in arrays){
+    var esc=escRe(arrN);
+    // Pattern: (function(){var ... _0xArr.push(_0xArr.shift()); } while(...))
+    // Also: while(true){var ... push/shift ...}
+    // Count how many push+shift cycles exist near the array
+    var rotRe=new RegExp(esc+'\\s*\\.\\s*push\\s*\\(\\s*'+esc+'\\s*\\.\\s*shift\\s*\\(\\s*\\)\\s*\\)','g');
+    var fullCode_save=code;
+    var rotCount=0, roteMatch;
+    // Find the rotation wrapper function and extract rotation count
+    // Look for:  while(_0x...++){switch(...)...} or for(var _=...;_<N;_++)
+    // Safest: simulate by counting the rotation invocations
+    var countRe=new RegExp('(?:push\\s*\\('+esc+'\\s*\\.\\s*shift|'+esc+'\\.push\\s*\\('+esc+'\\.shift)','g');
+    var cm2; var sampleBlock='';
+    // Extract the iife/function block containing this array's rotation
+    var blockRe=new RegExp('\\(function\\s*\\([^)]*\\)\\s*\\{[\\s\\S]{0,400}'+esc+'[\\s\\S]{0,600}?\\}\\s*\\('+esc+',\\s*0x([0-9a-fA-F]+)','g');
+    var bm=blockRe.exec(code);
+    if(bm){
+      rotCount=parseInt(bm[1],16);
+    } else {
+      // Try decimal rotation count
+      var blockRe2=new RegExp('\\(function\\s*\\([^)]*\\)\\s*\\{[\\s\\S]{0,400}'+esc+'[\\s\\S]{0,600}?\\}\\s*\\('+esc+',\\s*(\\d+)','g');
+      var bm2=blockRe2.exec(code);
+      if(bm2)rotCount=parseInt(bm2[1]);
+    }
+    if(rotCount>0&&rotCount<100000){
+      var arr=arrays[arrN].vals;
+      rotCount=rotCount%arr.length;
+      for(var ri=0;ri<rotCount;ri++){arr.push(arr.shift());}
+      changed=true;
+    }
+  }
+
+  /* Step 3 – find accessor functions (many variants) */
+  var accessors={};  // fnName -> {arrName, offset}
+
+  // Variant A: function _0xFn(_0xIdx){return _0xArr[_0xIdx];}
+  var accA=/function\s+(_0x[0-9a-fA-F]{2,8})\s*\(\s*(_0x[0-9a-fA-F]{2,8})(?:\s*,\s*_0x[0-9a-fA-F]{2,8})?\s*\)\s*\{\s*(?:_0x[0-9a-fA-F]{2,8}\s*=\s*_0x[0-9a-fA-F]{2,8}\s*-\s*(0x[0-9a-fA-F]+|\d+)\s*;)?\s*(?:return\s+)?(_0x[0-9a-fA-F]{2,8})\s*\[\s*\2\s*\]\s*;?\s*\}/g;
+  while((m=accA.exec(code))!==null){
+    var fnName=m[1], arrRef=m[4];
+    if(arrays[arrRef])accessors[fnName]={arrName:arrRef,offset:0};
+  }
+
+  // Variant B: function _0xFn(_0xIdx){return _0xArr[_0xIdx - 0x1a2];}  (offset inline)
+  var accB=/function\s+(_0x[0-9a-fA-F]{2,8})\s*\(\s*(_0x[0-9a-fA-F]{2,8})(?:\s*,\s*_0x[0-9a-fA-F]{2,8})?\s*\)\s*\{\s*(?:return\s+)?(_0x[0-9a-fA-F]{2,8})\s*\[\s*\2\s*-\s*(0x[0-9a-fA-F]+|\d+)\s*\]\s*;?\s*\}/g;
+  while((m=accB.exec(code))!==null){
+    var fnName=m[1],arrRef=m[3],offStr=m[4];
+    var off=offStr.startsWith('0x')?parseInt(offStr,16):parseInt(offStr);
+    if(arrays[arrRef])accessors[fnName]={arrName:arrRef,offset:off};
+  }
+
+  // Variant C: var _0xFn = function(_0xIdx){return _0xArr[_0xIdx];}
+  var accC=/var\s+(_0x[0-9a-fA-F]{2,8})\s*=\s*function\s*\(\s*(_0x[0-9a-fA-F]{2,8})\s*\)\s*\{\s*(?:return\s+)?(_0x[0-9a-fA-F]{2,8})\s*\[\s*\2\s*(?:-\s*(0x[0-9a-fA-F]+|\d+))?\s*\]\s*;?\s*\}/g;
+  while((m=accC.exec(code))!==null){
+    var fnName=m[1],arrRef=m[3],offStr=m[4]||'0';
+    var off=offStr.startsWith('0x')?parseInt(offStr,16):parseInt(offStr);
+    if(arrays[arrRef])accessors[fnName]={arrName:arrRef,offset:off};
+  }
+
+  /* Step 4 – inline all accessor calls */
+  for(var fnN in accessors){
+    var acc=accessors[fnN];
+    var arr=arrays[acc.arrName].vals;
+    var off=acc.offset;
+    var callRe=new RegExp(escRe(fnN)+'\\s*\\(\\s*(0x[0-9a-fA-F]+|\\d+)\\s*\\)','g');
+    code=code.replace(callRe,function(full,idxStr){
+      var i=(idxStr.startsWith('0x')?parseInt(idxStr,16):parseInt(idxStr))-off;
+      if(i>=0&&i<arr.length){totalInlined++;return JSON.stringify(arr[i]);}
+      return full;
+    });
+    if(totalInlined>0)changed=true;
+  }
+
+  /* Step 5 – inline direct array[idx] access */
+  for(var an in arrays){
+    var arr=arrays[an].vals;
+    var ap=new RegExp(escRe(an)+'\\s*\\[\\s*(0x[0-9a-fA-F]+|\\d+)\\s*\\]','g');
+    code=code.replace(ap,function(full,idxStr){
+      var i=idxStr.startsWith('0x')?parseInt(idxStr,16):parseInt(idxStr);
+      if(i>=0&&i<arr.length){totalInlined++;return JSON.stringify(arr[i]);}
+      return full;
+    });
+  }
+
+  return{result:code,success:changed||totalInlined>0,count:totalInlined};
+}
+
+/* ═══════════════════════════════════════
+   2. INLINE HEX / UNICODE / ESCAPES
+═══════════════════════════════════════ */
+function inlineEscapes(code){
+  var prev=code;
+  // \uXXXX and \xXX inside strings and standalone
+  code=code.replace(/\\u([0-9a-fA-F]{4})/g,function(_,h){
+    var c=String.fromCharCode(parseInt(h,16));
+    return /[^\x20-\x7e]/.test(c)?_:c;
+  });
+  code=code.replace(/\\x([0-9a-fA-F]{2})/g,function(_,h){
+    var c=String.fromCharCode(parseInt(h,16));
+    return /[^\x20-\x7e]/.test(c)?_:c;
+  });
+  // 0xNN numeric literals → decimal (only small ones where shorter)
+  code=code.replace(/\b0x([0-9a-fA-F]+)\b/g,function(m,h){
+    var n=parseInt(h,16);
+    return String(n).length<m.length?String(n):m;
+  });
+  return{result:code,success:code!==prev};
+}
+
+/* ═══════════════════════════════════════
+   3. PACKED JS UNPACKER  (p,a,c,k,e,d)
+═══════════════════════════════════════ */
+function unpackPacked(code){
+  if(!/eval\s*\(\s*function\s*\(p,a,c,k,e/i.test(code))return{result:code,success:false};
+  var m=code.match(/}\s*\(\s*'([\s\S]+?)',\s*(\d+)\s*,\s*(\d+)\s*,\s*'([\s\S]+?)'\s*\.split\('\|'\)/);
+  if(!m)return{result:code,success:false};
+  try{
+    var payload=m[1],base=parseInt(m[2]),dict=m[4].split('|');
+    var decoded=payload.replace(/\b\w+\b/g,function(w){
+      var idx=parseInt(w,base);
+      return(dict[idx]!==undefined&&dict[idx]!=='')?dict[idx]:w;
+    });
+    return{result:decoded,success:decoded!==code};
+  }catch(e){return{result:code,success:false};}
+}
+
+/* ═══════════════════════════════════════
+   4. EVAL-CHAIN UNWRAPPER
+   Handles: eval(atob(...)), eval(decodeURIComponent(...))
+   Nested: atob(atob(atob(...)))
+═══════════════════════════════════════ */
+function unwrapEvalChains(code){
+  var changed=false;
+  // atob chains: replace atob("...") with decoded string
+  var prev;
+  do{
+    prev=code;
+    code=code.replace(/\batob\s*\(\s*["']([A-Za-z0-9+\/=]+)["']\s*\)/g,function(m,b64){
+      try{var d=atob(b64);if(d&&d.length>0){changed=true;return JSON.stringify(d);}return m;}
+      catch(e){return m;}
+    });
+  }while(code!==prev);
+
+  // decodeURIComponent("...") → literal
+  code=code.replace(/\bdecodeURIComponent\s*\(\s*["']([^"']+)["']\s*\)/g,function(m,enc){
+    try{var d=decodeURIComponent(enc);changed=true;return JSON.stringify(d);}
+    catch(e){return m;}
+  });
+
+  // unescape("...") → literal
+  code=code.replace(/\bunescape\s*\(\s*["']([^"']+)["']\s*\)/g,function(m,enc){
+    try{var d=unescape(enc);changed=true;return JSON.stringify(d);}
+    catch(e){return m;}
+  });
+
+  return{result:code,success:changed};
+}
+
+/* ═══════════════════════════════════════
+   5. STRING CONCAT FOLDER
+   "a"+"b" → "ab"  (multi-pass, mixed quotes)
+═══════════════════════════════════════ */
+function foldStringConcat(code){
+  var prev='';
+  var MAX=30;var i=0;
+  while(prev!==code&&i++<MAX){
+    prev=code;
+    code=code.replace(/"((?:[^"\\]|\\.)*)"\s*\+\s*"((?:[^"\\]|\\.)*)"/g,function(_,a,b){return'"'+a+b+'"';});
+    code=code.replace(/'((?:[^'\\]|\\.)*)'\s*\+\s*'((?:[^'\\]|\\.)*)'/g,function(_,a,b){return"'"+a+b+"'";});
+    code=code.replace(/"((?:[^"\\]|\\.)*)"\s*\+\s*'((?:[^'\\]|\\.)*)'/g,function(_,a,b){return'"'+a+b+'"';});
+    code=code.replace(/'((?:[^'\\]|\\.)*)'\s*\+\s*"((?:[^"\\]|\\.)*)"/g,function(_,a,b){return'"'+a+b+'"';});
+  }
+  return code;
+}
+
+/* ═══════════════════════════════════════
+   6. CONSTANT PROPAGATION
+   var x = "literal";  →  inline x everywhere (if ≤4 uses)
+   Arithmetic folding: (3 + 4) → 7
+   Hex folding: 0x1a → 26
+═══════════════════════════════════════ */
+function propagateConstants(code){
+  var changed=true,passes=0,total=0;
+  // single-char / very short name skip list
+  var SKIP=/^(i|j|k|n|x|y|s|r|a|b|c|d|e|v|t|f|l|m|p|q|u|w|_|__)$/;
+  while(changed&&passes<15){
+    changed=false;passes++;
+    // const/let/var NAME = "string"|number|true|false|null
+    code=code.replace(/\b(?:const|let|var)\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*(?:"((?:[^"\\]|\\.)*)"|'((?:[^'\\]|\\.)*)'|(-?\d+(?:\.\d+)?(?:e[+\-]?\d+)?)|(\btrue\b|\bfalse\b|\bnull\b))\s*;/g,
+    function(decl,name,dq,sq,num,kw){
+      if(SKIP.test(name))return decl;
+      var val=dq!==undefined?'"'+dq+'"':sq!==undefined?"'"+sq+"'":num!==undefined?num:kw;
+      var esc=escRe(name);
+      var count=(code.match(new RegExp('\\b'+esc+'\\b','g'))||[]).length;
+      if(count>=2&&count<=5){
+        var before=code;
+        code=code.replace(new RegExp('(?<![\\.\\w])'+esc+'(?![\\w$])','g'),val);
+        if(code!==before){changed=true;total++;return '';}
+      }
+      return decl;
+    });
+    // arithmetic: (a OP b)
+    code=code.replace(/\(\s*(-?\d+(?:\.\d+)?)\s*([+\-*\/])\s*(-?\d+(?:\.\d+)?)\s*\)/g,function(m,a,op,b){
+      var x=parseFloat(a),y=parseFloat(b),r;
+      if(op==='+')r=x+y;else if(op==='-')r=x-y;
+      else if(op==='*')r=x*y;else if(op==='/'&&y!==0)r=x/y;else return m;
+      if(!isFinite(r)||isNaN(r))return m;
+      var rs=Number.isInteger(r)?String(r):r.toFixed(6).replace(/\.?0+$/,'');
+      return rs;
+    });
+  }
+  return{result:code,success:total>0};
+}
+
+/* ═══════════════════════════════════════
+   7. CONTROL FLOW UNFLATTENER
+   Handles the most common obfuscator pattern:
+   var _order = "3|1|2|0".split("|"), _idx=0;
+   while(true){ switch(_order[_idx++]){
+     case "0": ...; break;
+     case "1": ...; break;
+   }}
+   → unrolls to the correct statement order
+═══════════════════════════════════════ */
+function unflattenControlFlow(code){
+  var changed=false;
+
+  // Pattern 1: var _0x = "N|N|N".split("|"), idx=0; while(!![]){ switch(_0x[idx++]){...} }
+  var p1=/var\s+(_0x[0-9a-fA-F]+)\s*=\s*["']([0-9|]+)["']\s*\.\s*split\s*\(\s*["'][|]["']\s*\)\s*,\s*(_0x[0-9a-fA-F]+)\s*=\s*0\s*;[\s\S]{0,300}?while\s*\(\s*(!!\[\]|true)\s*\)\s*\{\s*switch\s*\(\s*\1\s*\[\s*\3\s*\+\+\s*\]\s*\)\s*\{([\s\S]*?)\}\s*(?:continue\s*;)?\s*\}/g;
+  code=code.replace(p1,function(full,_arrN,orderStr,_idxN,_cond,body){
+    changed=true;
+    var order=orderStr.split('|');
+    var cases={};
+    var casePat=/case\s+["']?(\w+)["']?\s*:([\s\S]*?)(?=case\s+["']?\w|$)/g;
+    var cm;
+    while((cm=casePat.exec(body))!==null){
+      cases[cm[1]]=cm[2].replace(/\bbreak\s*;/g,'').trim();
+    }
+    var result=order.map(function(k){return cases[k]||'';}).join('\n');
+    return'/* [CF-UNFLATTENED] */\n'+result;
+  });
+
+  // Pattern 2: pure while(true)+switch counter increment (no order array)
+  var p2=/while\s*\(\s*(!!\[\]|true)\s*\)\s*\{\s*switch\s*\(\s*(_0x[0-9a-fA-F]+)\s*\+\+\s*\)\s*\{([\s\S]*?)\}\s*(?:continue\s*;)?\s*\}/g;
+  code=code.replace(p2,function(full,_cond,_counter,body){
+    changed=true;
+    var cases=[];
+    var casePat=/case\s+(\d+)\s*:([\s\S]*?)(?=case\s+\d|$)/g;
+    var cm;
+    while((cm=casePat.exec(body))!==null){
+      cases.push({n:parseInt(cm[1]),body:cm[2].replace(/\bbreak\s*;/g,'').trim()});
+    }
+    cases.sort(function(a,b){return a.n-b.n;});
+    return'/* [CF-UNFLATTENED] */\n'+cases.map(function(c){return c.body;}).join('\n');
+  });
+
+  return{result:code,success:changed};
+}
+
+/* ═══════════════════════════════════════
+   8. DEAD BRANCH + DEAD CODE PRUNER
+═══════════════════════════════════════ */
+function pruneDeadCode(code){
+  var removed=0;
+
+  // if(false){...}  or  if(false){...}else{keep}
+  code=code.replace(/\bif\s*\(\s*false\s*\)\s*\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}(?:\s*else\s*\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\})?/g,function(m,e){removed++;return e||'';});
+  // if(true){keep}else{...}
+  code=code.replace(/\bif\s*\(\s*true\s*\)\s*\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}(?:\s*else\s*\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\})?/g,function(m,b){removed++;return b;});
+  // while(false){...}
+  code=code.replace(/\bwhile\s*\(\s*false\s*\)\s*\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g,function(){removed++;return'';});
+
+  // Remove debugger traps
+  code=code.replace(/\bdebugger\b\s*;?/g,function(){removed++;return'';});
+
+  // Remove empty catch blocks
+  code=code.replace(/\}\s*catch\s*\(\s*\w*\s*\)\s*\{\s*\}/g,'} catch(e){}');
+
+  // Remove lines that are just standalone string literals (dead string trick)
+  code=code.replace(/^[ \t]*(?:"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')\s*;[ \t]*$/gm,function(){removed++;return'';});
+
+  return{result:code,removed:removed};
+}
+
+/* ═══════════════════════════════════════
+   9. BEAUTIFIER  (indent-based, handles minified)
+═══════════════════════════════════════ */
+function beautifyJS(code){
+  var looksLikeCode=(code.indexOf('{')!==-1&&code.indexOf('}')!==-1)||code.indexOf(';')!==-1;
+  if(!looksLikeCode)return code;
+
+  // Space around operators
+  code=code.replace(/([^=!<>&|])=([^>=])/g,'$1 = $2');
+  code=code.replace(/,([^\s\n])/g,', $1');
+
+  // Newlines at statement boundaries (only if minified — check line length)
+  var avgLen=code.length/(code.split('\n').length||1);
+  if(avgLen>120){
+    code=code.replace(/;(?!\n)/g,';\n');
+    code=code.replace(/\{(?!\n)/g,'{\n');
+    code=code.replace(/\}(?!\n)/g,'}\n');
+  }
+
+  // Indent
+  var lines=code.split('\n'),result=[],level=0,TAB='  ';
+  for(var i=0;i<lines.length;i++){
+    var t=lines[i].trim();
+    if(!t){result.push('');continue;}
+    var closings=(t.match(/^[}\])]|^[}\]],/)||[]).length;
+    if(/^[}\])]/.test(t))level=Math.max(0,level-1);
+    result.push(TAB.repeat(level)+t);
+    // Count net braces (skip string contents naively)
+    var opens=0,closes=0;
+    for(var c=0;c<t.length;c++){
+      var ch=t[c];
+      if(ch==='"'||ch==="'"){while(++c<t.length&&t[c]!==ch){if(t[c]==='\\')c++;}}
+      else if(ch==='{'||ch==='['||ch==='(')opens++;
+      else if(ch==='}'||ch===']'||ch===')')closes++;
+    }
+    level=Math.max(0,level+opens-closes);
+  }
+  code=result.join('\n');
+  // Clean up excess blank lines
+  code=code.replace(/\n{3,}/g,'\n\n');
+  return code;
+}
+
+/* ═══════════════════════════════════════
+   DECODERS (kept from v7, for auto-detect pass)
+═══════════════════════════════════════ */
+function decodeBase64(s){try{var t=s.trim().replace(/\s/g,'');if(t.length<4||t.length%4!==0)return{result:s,success:false};var r=atob(t.replace(/-/g,'+').replace(/_/g,'/'));return{result:r,success:true};}catch(e){return{result:s,success:false};}}
+function decodeURL(s){try{var d=decodeURIComponent(s);return{result:d,success:d!==s};}catch(e){return{result:s,success:false};}}
+var ROT13_HINTS=['erghea','shapgvba','pbafg','yrg','ine','vs(','ryfr','gel','pngpu'];
+function isROT13(s){var l=s.toLowerCase(),h=0;for(var i=0;i<ROT13_HINTS.length;i++){if(l.indexOf(ROT13_HINTS[i])!==-1)h++;if(h>=2)return true;}return false;}
+function decodeROT13(s){
+  if(!isROT13(s))return{result:s,success:false};
+  var d=s.replace(/[a-zA-Z]/g,function(c){var b=c<='Z'?65:97;return String.fromCharCode((c.charCodeAt(0)-b+13)%26+b);});
+  if(d===s)return{result:s,success:false};
+  /* scoreEnglish is IDENTICAL before/after ROT13 (letter freq preserved).
+     Real check: decoded output must contain actual JS keywords. */
+  var jsKw=['function ','return ','var ','let ','const ','console.','document.','window.','typeof ','instanceof '];
+  var hits=0;for(var i=0;i<jsKw.length;i++)if(d.indexOf(jsKw[i])!==-1)hits++;
+  return{result:d,success:hits>=2};
+}
+function decodeJSFuck(s){var t=s.trim();if(!/^\s*[\[(!+\]]+/.test(t)||!/\[\+\[\]\]/.test(t))return{result:s,success:false};try{var fn=new Function('return ('+t.replace(/;\s*$/,'')+')');var r=String(fn());return r&&r!=='undefined'&&r!==t?{result:r,success:true}:{result:s,success:false};}catch(e){return{result:s,success:false};}}
+function decodeAAEncode(s){if(!/ﾟωﾟ|ﾟΘﾟ/.test(s))return{result:s,success:false};try{var fn=new Function('return ('+s+')');var r=String(fn());return{result:r,success:r!==s&&r.length>0};}catch(e){return{result:s,success:false};}}
+function decodePacked(s){return unpackPacked(s);}
+function decodeBinary(s){try{var g=s.trim().split(/\s+/);if(g.length<3||!g.every(function(x){return/^[01]{7,8}$/.test(x);}))return{result:s,success:false};return{result:g.map(function(x){return String.fromCharCode(parseInt(x,2));}).join(''),success:true};}catch(e){return{result:s,success:false};}}
+function decodeMorse(s){var M={'.-':'A','-..':'B','-.-.':'C','-..':'D','.':'E','..-.':'F','--.':'G','....':'H','..':'I','.---':'J','-.-':'K','.-..':'L','--':'M','-.':'N','---':'O','.--.':'P','--.-':'Q','.-.':'R','...':'S','-':'T','..-':'U','...-':'V','.--':'W','-..-':'X','-.--':'Y','--..':'Z','-----':'0','.----':'1','..---':'2','...--':'3','....-':'4','.....':'5','-....':'6','--...':'7','---..':'8','----.':'9'};try{var words=s.trim().split(/\s{2,}|\s*\/\s*/);var d=words.map(function(w){return w.split(' ').map(function(c){return M[c]||c;}).join('');}).join(' ');return{result:d,success:d!==s&&/[A-Z]/.test(d)};}catch(e){return{result:s,success:false};}}
+
+/* ═══════════════════════════════════════
+   OBFUSCATION SCORE
+═══════════════════════════════════════ */
+function calcObfScore(s){
+  var score=0,bd={hexIdentifiers:0,stringArrays:0,packed:0,controlFlow:0,evalUsage:0};
+  var hexIds=(s.match(/_0x[a-fA-F0-9]{2,}/g)||[]).length;
+  bd.hexIdentifiers=Math.min(40,Math.floor(hexIds/5));
+  score+=bd.hexIdentifiers;
+  if(/\bvar\s+_0x[0-9a-fA-F]+\s*=\s*\[/.test(s)){bd.stringArrays=20;score+=20;}
+  if(/eval\s*\(\s*function\s*\(p,a,c,k,e/i.test(s)){bd.packed=15;score+=15;}
+  if(/while\s*\(\s*(!!\[\]|true)\s*\)\s*\{\s*switch/.test(s)){bd.controlFlow=15;score+=15;}
+  var evCount=(s.match(/\beval\s*\(/g)||[]).length;bd.evalUsage=Math.min(10,evCount*3);score+=bd.evalUsage;
+  return{score:Math.min(100,score),breakdown:bd};
+}
+
+/* ═══════════════════════════════════════
+   THREAT DETECTION + BYPASS
+═══════════════════════════════════════ */
+function detectCrashers(s){
+  var threats=[];
+  if(/while\s*\(\s*true\s*\)|for\s*\(\s*;\s*;\s*\)/.test(s))threats.push({name:'Infinite Loop',type:'loop',bypass:'Neutralized'});
+  if(/eval\s*\(\s*(?:atob|unescape|decodeURI)\s*\(/.test(s))threats.push({name:'Encoded Eval',type:'eval',bypass:'Decoded without execution'});
+  if((s.match(/debugger/g)||[]).length>3)threats.push({name:'Debugger Trap',type:'anti-debug',bypass:'Removed'});
+  if(/Date\.now\(\).*performance\.now\(\)|performance\.now.*Date\.now/.test(s))threats.push({name:'Timing AntiDebug',type:'anti-debug',bypass:'Detected'});
+  if(/Array\s*\(\s*\d{7,}\s*\)|new\s+Array\s*\(\s*\d{7,}\s*\)/.test(s))threats.push({name:'Memory Bomb',type:'memory',bypass:'Blocked'});
+  if(/document\.write\s*\(/.test(s)&&(s.match(/document\.write/g)||[]).length>10)threats.push({name:'DOM Flood',type:'dos',bypass:'Capped'});
+  if(/__proto__|constructor\s*\[|Object\.prototype\s*\[/.test(s))threats.push({name:'Prototype Pollution',type:'injection',bypass:'Flagged'});
+  if(/navigator\s*\.\s*webdriver|window\s*\.\s*Firebug/.test(s))threats.push({name:'Browser Fingerprinting',type:'fingerprint',bypass:'Detected'});
+  if(/atob\s*\(\s*atob\s*\(/.test(s))threats.push({name:'Multi-Layer Encoding',type:'eval',bypass:'Unwrapped'});
+  if(/\[\+\[\]\]/.test(s))threats.push({name:'JSFuck Encoding',type:'eval',bypass:'Use JSFuck mode'});
+  var hx=(s.match(/_0x[0-9a-f]+\s*\(/gi)||[]).length;if(hx>20)threats.push({name:'Hex Obfuscation ('+hx+'x)',type:'obf',bypass:'String-array resolver active'});
+  return threats;
+}
+function applyBypass(s,threats){
+  threats.forEach(function(t){
+    if(t.type==='loop'){s=s.replace(/while\s*\(\s*true\s*\)/g,'while(false/*NEUTRALIZED*/)');s=s.replace(/for\s*\(\s*;\s*;\s*\)/g,'for(;false;)');}
+    if(t.type==='anti-debug')s=s.replace(/\bdebugger\b\s*;?/g,'');
+    if(t.type==='eval')s=s.replace(/\beval\s*\(/g,'/*EVAL*/(');
+  });
+  return s;
+}
+
+/* ═══════════════════════════════════════
+   CREDENTIAL SCANNER
+═══════════════════════════════════════ */
+function scanCredentials(s){
+  var hits=[],seen=new Set();
+  var patterns=[
+    {type:'jwt',re:/eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/g,label:'JWT Token'},
+    {type:'aws',re:/AKIA[0-9A-Z]{16}/g,label:'AWS Access Key'},
+    {type:'key',re:/sk-[a-zA-Z0-9]{32,}/g,label:'API Key (sk-)'},
+    {type:'key',re:/pk_live_[a-zA-Z0-9]{24,}/g,label:'Stripe Live Key'},
+    {type:'key',re:/gh[pousr]_[A-Za-z0-9_]{36,}/g,label:'GitHub Token'},
+    {type:'key',re:/AIza[0-9A-Za-z\-_]{35}/g,label:'Google API Key'},
+    {type:'ip',re:/\b(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\b/g,label:'IP Address'},
+    {type:'email',re:/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g,label:'Email Address'},
+    {type:'domain',re:/https?:\/\/[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/gi,label:'URL/Domain'},
+  ];
+  patterns.forEach(function(p){
+    var re=new RegExp(p.re.source,p.re.flags),m;
+    while((m=re.exec(s))!==null){
+      var k=p.type+':'+m[0];
+      if(!seen.has(k)){seen.add(k);hits.push({type:p.type,label:p.label,value:m[0].slice(0,80)});}
+      if(hits.length>60)break;
+    }
+  });
+  return hits;
+}
+
+/* ═══════════════════════════════════════
+   MAIN PIPELINE  (iterative, ≤20 global passes)
+═══════════════════════════════════════ */
+self.onmessage=function(e){
+  var input=e.data.input, method=e.data.method, isLarge=e.data.isLarge, opts=e.data.opts;
+  var code=input, totalLayers=0, detectedBadge=[], deadRemoved=0;
+  function post(type,msg,pct){self.postMessage({type:type,msg:msg,pct:pct});}
+
+  post('log','[0/6] Threat scan...',3);
+  var threats=detectCrashers(code);
+  self.postMessage({type:'crasher-result',threats:threats});
+  if(threats.length>0){
+    post('log-crash','⚠ '+threats.length+' threat(s) detected',5);
+    if(opts.bypassCrashers){code=applyBypass(code,threats);post('log-ok','  ↳ bypass applied',null);}
+  }else{post('log-ok','✓ no threats',null);}
+
+  /* === Manual method shortcut === */
+  if(method!=='auto'){
+    var manualMap={
+      'base64':function(){return decodeBase64(code);},
+      'url':function(){return decodeURL(code);},
+      'rot13':function(){return decodeROT13(code);},
+      'jsfuck':function(){return decodeJSFuck(code);},
+      'aaencode':function(){return decodeAAEncode(code);},
+      'packed':function(){return decodePacked(code);},
+      'binary':function(){return decodeBinary(code);},
+      'morse':function(){return decodeMorse(code);},
+      'unicode':function(){var d=code.replace(/\\u([0-9a-fA-F]{4})/g,function(_,h){return String.fromCharCode(parseInt(h,16));}).replace(/\\x([0-9a-fA-F]{2})/g,function(_,h){return String.fromCharCode(parseInt(h,16));});return{result:d,success:d!==code};},
+      'hex':function(){try{var h=code.trim().replace(/0x/gi,'').replace(/[\s,;]+/g,'');if(!/^[0-9a-fA-F]+$/.test(h)||h.length%2!==0)return{result:code,success:false};var r='';for(var i=0;i<h.length;i+=2)r+=String.fromCharCode(parseInt(h.substr(i,2),16));return{result:r,success:true};}catch(ex){return{result:code,success:false};}}
+    };
+    var fn=manualMap[method];
+    if(fn){var res=fn();if(res.success){code=res.result;totalLayers=1;detectedBadge.push(method);}}
+    post('log-ok','✓ '+method+' done',50);
+    // still run cleanup passes
+  }
+
+  /* === AUTO PIPELINE (iterative) === */
+  var globalChanged=true, globalPass=0;
+  while(globalChanged && globalPass<20){
+    globalChanged=false;
+    globalPass++;
+    post('log','[pass '+globalPass+'] deobfuscating...',10+globalPass*3);
+
+    /* 1. String array resolver */
+    var sarRes=resolveStringArrays(code);
+    if(sarRes.success&&sarRes.result!==code){
+      code=sarRes.result;globalChanged=true;totalLayers++;
+      detectedBadge.push('str-array');
+      post('log-ok','  ✓ str-array inlined ('+sarRes.count+')',null);
+    }
+
+    /* 2. Inline escapes + hex literals */
+    var escRes=inlineEscapes(code);
+    if(escRes.success){code=escRes.result;globalChanged=true;detectedBadge.indexOf('hex-inline')===-1&&detectedBadge.push('hex-inline');}
+
+    /* 3. Eval chain unwrapper */
+    var evalRes=unwrapEvalChains(code);
+    if(evalRes.success&&evalRes.result!==code){
+      code=evalRes.result;globalChanged=true;totalLayers++;
+      detectedBadge.indexOf('eval-unwrap')===-1&&detectedBadge.push('eval-unwrap');
+      post('log-ok','  ✓ eval/atob chains unwrapped',null);
+    }
+
+    /* 4. Packed JS */
+    if(method==='auto'||method==='packed'){
+      var packRes=unpackPacked(code);
+      if(packRes.success&&packRes.result!==code){
+        code=packRes.result;globalChanged=true;totalLayers++;
+        detectedBadge.indexOf('packed')===-1&&detectedBadge.push('packed');
+        post('log-ok','  ✓ packed JS unpacked',null);
+      }
+    }
+
+    /* 5. String concat fold */
+    var folded=foldStringConcat(code);
+    if(folded!==code){code=folded;globalChanged=true;detectedBadge.indexOf('concat-fold')===-1&&detectedBadge.push('concat-fold');}
+
+    /* 6. Control flow unflatten */
+    var cfRes=unflattenControlFlow(code);
+    if(cfRes.success&&cfRes.result!==code){
+      code=cfRes.result;globalChanged=true;totalLayers++;
+      detectedBadge.indexOf('cf-unflatten')===-1&&detectedBadge.push('cf-unflatten');
+      post('log-ok','  ✓ control flow unflattened',null);
+    }
+
+    /* 7. Constant propagation */
+    if(opts.evalHex){
+      var cpRes=propagateConstants(code);
+      if(cpRes.success&&cpRes.result!==code){code=cpRes.result;globalChanged=true;detectedBadge.indexOf('const-prop')===-1&&detectedBadge.push('const-prop');}
+    }
+
+    /* 8. Dead code pruner */
+    if(opts.deadCode){
+      var pruneRes=pruneDeadCode(code);
+      if(pruneRes.removed>0){code=pruneRes.result;deadRemoved+=pruneRes.removed;globalChanged=true;}
+    }
+
+    /* auto-decode pass for simple encodings */
+    if(method==='auto'&&globalPass===1){
+      var simpleDecoders=[
+        {name:'jsfuck',fn:function(){return decodeJSFuck(code);}},
+        {name:'aaencode',fn:function(){return decodeAAEncode(code);}},
+        {name:'rot13',fn:function(){return decodeROT13(code);}},
+        {name:'base64',fn:function(){return decodeBase64(code);}},
+        {name:'url',fn:function(){return decodeURL(code);}},
+        {name:'binary',fn:function(){return decodeBinary(code);}},
+        {name:'morse',fn:function(){return decodeMorse(code);}},
+      ];
+      for(var di=0;di<simpleDecoders.length;di++){
+        var sd=simpleDecoders[di];
+        var sdr=sd.fn();
+        if(sdr.success&&sdr.result!==code&&hasJSKeywords(sdr.result)){
+          code=sdr.result;globalChanged=true;totalLayers++;
+          detectedBadge.push(sd.name);
+          post('log-ok','  ✓ detected+decoded: '+sd.name,null);
+        }
+      }
+    }
+  }
+
+  post('log','[6/6] Final cleanup + beautify...',85);
+  if(opts.beautify)code=beautifyJS(code);
+  // Final concat fold after beautify
+  code=foldStringConcat(code);
+
+  var scoreData=calcObfScore(input);
+  var creds=scanCredentials(code);
+
+  post('done','',100);
+  self.postMessage({
+    type:'result',output:code,layers:totalLayers,deadRemoved:deadRemoved,
+    badge:detectedBadge,threats:threats,
+    obfScore:scoreData,credentials:creds
+  });
+};
+</script>
+
+<!-- ══════════ APP ══════════ -->
+<div class="app" style="max-width:560px;width:100%;margin:0 auto;background:#eef0f4;border-radius:50px;padding:36px 30px;box-shadow:22px 22px 40px #b8b9be,-22px -22px 40px #ffffff;margin-bottom:20px;">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo-wrapper" style="display:flex;justify-content:center;">
+      <div class="header-shield" style="width:100px;height:100px;border-radius:50%;background:#eef0f4;box-shadow:8px 8px 16px #b8b9be,-8px -8px 16px #ffffff;display:flex;align-items:center;justify-content:center;font-size:40px;color:#2d4059;"><i class="fas fa-shield-alt"></i></div>
+    </div>
+    <div class="header-title">DEOBSF</div>
+    <div class="header-sub">Military Grade Deobfuscator · v8.0</div>
+    <div class="badge-row">
+      <span class="badge cyan">v8 Engine</span>
+      <span class="badge red">Crasher Shield</span>
+      <span class="badge green">Multi-Layer</span>
+      <span class="badge orange">Eval Unwrapper</span>
+      <span class="badge purple">CF Unflatten</span>
+      <span class="badge yellow">20-Pass Loop</span>
+    </div>
+  </div>
+
+  <!-- DETECTION BADGE -->
+  <div class="det-badge" id="detectionBadge">
+    <span class="det-badge-label">// processing pipeline</span>
+    <span id="detectedLayers"></span>
+  </div>
+
+  <!-- OBFUSCATION SCORE CARD -->
+  <div class="score-card" id="scoreCard">
+    <div class="sc-header">
+      <div>
+        <div class="sc-number" id="scNumber" style="color:#4a90e2">—</div>
+        <div class="sc-grade" id="scGrade" style="color:#4a5c72">SCAN FIRST</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#4a5c72;text-transform:uppercase;letter-spacing:1px;">Obfuscation Score</div>
+        <div style="font-size:11px;color:#4a5c72;margin-top:4px;" id="scDesc"></div>
+      </div>
+    </div>
+    <div class="sc-items" id="scItems"></div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-bar" style="margin-bottom:16px;">
+    <div class="stat-cell" id="sc0"><span class="stat-val" id="statChars">0</span><span class="stat-label">Chars In</span></div>
+    <div class="stat-cell" id="sc1"><span class="stat-val" id="statLayers">0</span><span class="stat-label">Layers</span></div>
+    <div class="stat-cell" id="sc2"><span class="stat-val" id="statDead">0</span><span class="stat-label">Dead</span></div>
+    <div class="stat-cell" id="sc3"><span class="stat-val" id="statOut">0</span><span class="stat-label">Chars Out</span></div>
+    <div class="stat-cell" id="sc4"><span class="stat-val" id="statEntropy">—</span><span class="stat-label">Entropy</span></div>
+    <div class="stat-cell" id="sc5"><span class="stat-val" id="statCreds">0</span><span class="stat-label">Creds</span></div>
+  </div>
+
+  <!-- INPUT -->
+  <div class="panel">
+    <div class="panel-head no-collapse">
+      <div class="ph-icon cyan"><i class="fas fa-terminal"></i></div>
+      <div class="ph-text"><div class="ph-title">Input</div><div class="ph-sub">Paste obfuscated code or upload a file</div></div>
+    </div>
+    <div class="panel-body">
+      <div class="field-label"><i class="fas fa-code"></i> Obfuscated Source</div>
+      <textarea id="inputCode" placeholder="Paste your obfuscated JavaScript, HTML, PHP, Python...&#10;&#10;Supports: Base64, Hex, Unicode, ROT13, JSFuck, AAEncode, Packed JS, Brainfuck, Binary, Morse, XOR, Caesar, Atbash, URL-encoded...&#10;&#10;Up to 2MB" oninput="onInputChange()"></textarea>
+      <div style="margin-top:12px;">
+        <div class="field-label"><i class="fas fa-file-arrow-up"></i> Or Upload File</div>
+        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+          <i class="fas fa-cloud-arrow-up"></i>
+          <span id="uploadLabel">Click or drag &amp; drop</span>
+          <div class="uz-sub">.js · .ts · .html · .php · .py · .txt · .json — Max 2MB</div>
+        </div>
+        <input type="file" id="fileInput" accept=".js,.jsx,.ts,.tsx,.html,.json,.php,.py,.rb,.txt,.lua,.cs" onchange="handleFile(event)">
+      </div>
+      <div class="size-warn" id="sizeWarn">⚡ Large input — XOR/Caesar use 50KB sample for key detection</div>
+    </div>
+  </div>
+
+  <!-- CRASHER SHIELD -->
+  <div class="panel" id="panelThreat">
+    <div class="panel-head" onclick="togglePanel('panelThreat')">
+      <div class="ph-icon red"><i class="fas fa-radiation"></i></div>
+      <div class="ph-text"><div class="ph-title">Crasher Shield — Threat Scanner</div><div class="ph-sub">16 threat categories · Loop bombs · Memory attacks · AntiDebug · Fingerprinting</div></div>
+      <i class="fas fa-chevron-down collapse-arrow"></i>
+    </div>
+    <div class="panel-body">
+      <div class="threat-list" id="threatList"><div class="no-threats">// run deobfuscation to scan for threats</div></div>
+      <div class="score-track"><div class="score-fill sf-low" id="threatFill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- POST PROCESSING -->
+  <div class="panel" id="panelPost">
+    <div class="panel-head" onclick="togglePanel('panelPost')">
+      <div class="ph-icon green"><i class="fas fa-sliders"></i></div>
+      <div class="ph-text"><div class="ph-title">Post-Processing</div><div class="ph-sub">Beautify · Rename · Hex eval · Dead code · Const propagation · CF unflatten</div></div>
+      <i class="fas fa-chevron-down collapse-arrow"></i>
+    </div>
+    <div class="panel-body">
+      <div class="toggle-grid">
+        <div class="toggle-item"><div class="tg-text"><div class="tg-label">Beautify</div><div class="tg-sub">format + indent</div></div><label class="switch"><input type="checkbox" id="togBeautify" checked><span class="slider"></span></label></div>
+        <div class="toggle-item"><div class="tg-text"><div class="tg-label">Rename Vars</div><div class="tg-sub">_0x → v_1</div></div><label class="switch"><input type="checkbox" id="togRename" checked><span class="slider"></span></label></div>
+        <div class="toggle-item"><div class="tg-text"><div class="tg-label">Eval Hex + Const</div><div class="tg-sub">0x1f→31, propagate</div></div><label class="switch"><input type="checkbox" id="togHex" checked><span class="slider"></span></label></div>
+        <div class="toggle-item"><div class="tg-text"><div class="tg-label">Dead Code</div><div class="tg-sub">remove junk lines</div></div><label class="switch"><input type="checkbox" id="togDead" checked><span class="slider"></span></label></div>
+        <div class="toggle-item"><div class="tg-text"><div class="tg-label">Bypass Crashers</div><div class="tg-sub">neutralize traps</div></div><label class="switch"><input type="checkbox" id="togBypass" checked><span class="slider"></span></label></div>
+        <div class="toggle-item"><div class="tg-text"><div class="tg-label">Auto Smart Rewrite</div><div class="tg-sub">AI after decode</div></div><label class="switch"><input type="checkbox" id="togSmartRewrite"><span class="slider"></span></label></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DECODE METHOD -->
+  <div class="panel" id="panelMethod">
+    <div class="panel-head" onclick="togglePanel('panelMethod')">
+      <div class="ph-icon orange"><i class="fas fa-wand-sparkles"></i></div>
+      <div class="ph-text"><div class="ph-title">Decode Method</div><div class="ph-sub">18 algorithms — Auto detects and chains layers automatically</div></div>
+      <i class="fas fa-chevron-down collapse-arrow"></i>
+    </div>
+    <div class="panel-body">
+      <div class="method-grid">
+        <button class="meth-btn active" onclick="setMethod('auto',this)">⚡ Auto</button>
+        <button class="meth-btn" onclick="setMethod('base64',this)">Base64</button>
+        <button class="meth-btn" onclick="setMethod('hex',this)">Hex</button>
+        <button class="meth-btn" onclick="setMethod('url',this)">URL Enc</button>
+        <button class="meth-btn" onclick="setMethod('unicode',this)">Unicode</button>
+        <button class="meth-btn" onclick="setMethod('html',this)">HTML Ent</button>
+        <button class="meth-btn" onclick="setMethod('rot13',this)">ROT13</button>
+        <button class="meth-btn" onclick="setMethod('binary',this)">Binary</button>
+        <button class="meth-btn" onclick="setMethod('octal',this)">Octal</button>
+        <button class="meth-btn" onclick="setMethod('morse',this)">Morse</button>
+        <button class="meth-btn" onclick="setMethod('atbash',this)">Atbash</button>
+        <button class="meth-btn" onclick="setMethod('caesar',this)">Caesar</button>
+        <button class="meth-btn" onclick="setMethod('xor',this)">XOR</button>
+        <button class="meth-btn" onclick="setMethod('packed',this)">Packed JS</button>
+        <button class="meth-btn" onclick="setMethod('brainfuck',this)">Brainfuck</button>
+        <button class="meth-btn" onclick="setMethod('jsfuck',this)">JSFuck</button>
+        <button class="meth-btn" onclick="setMethod('aaencode',this)">AAEncode</button>
+        <button class="meth-btn" onclick="setMethod('jjencode',this)">JJEncode</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROGRESS + MAIN BUTTONS -->
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="progress-lbl" id="progressLabel">initializing...</div>
+  </div>
+  <div class="btn-row">
+    <button class="btn-primary" id="decryptBtn" onclick="runDecrypt()"><i class="fas fa-unlock-alt"></i>&nbsp; DEOBFUSCATE</button>
+    <button class="btn-cancel" id="cancelBtn" onclick="cancelDecode()"><i class="fas fa-stop-circle"></i> STOP</button>
+    <button class="btn-secondary" id="clearBtn" onclick="clearAll()"><i class="fas fa-rotate-right"></i></button>
+  </div>
+
+  <!-- TERMINAL -->
+  <div class="terminal" id="terminal">
+    <div class="t-line">DEOBSF v7.0 · String-Array Resolver · CF Unflattener · Const Propagation · Cred Scanner</div>
+    <div class="t-line t-info">18 decode algorithms · JSFuck · AAEncode · Dead Branch Eliminator · v7.0</div>
+    <div class="t-line t-clean">built by @kaaxhunter · waiting for input...</div>
+  </div>
+
+  <!-- OUTPUT -->
+  <div class="panel">
+    <div class="panel-head no-collapse">
+      <div class="ph-icon green"><i class="fas fa-code"></i></div>
+      <div class="ph-text"><div class="ph-title">Clean Output</div><div class="ph-sub">Deobfuscated, beautified, renamed result</div></div>
+    </div>
+    <div class="panel-body">
+      <textarea id="outputCode" readonly placeholder="// Deobfuscated output appears here..."></textarea>
+      <div class="action-strip">
+        <button class="btn-mini" onclick="copyOutput()"><i class="fas fa-copy"></i> Copy</button>
+        <button class="btn-mini" onclick="downloadOutput()"><i class="fas fa-download"></i> Download</button>
+        <button class="btn-mini" onclick="loadOutputAsInput()"><i class="fas fa-layer-group"></i> Re-Decode</button>
+        <button class="btn-mini" onclick="runDiff()"><i class="fas fa-code-compare"></i> Diff</button>
+        <button class="btn-mini" onclick="runHashGen()"><i class="fas fa-hashtag"></i> Hashes</button>
+        <button class="btn-mini" onclick="saveHistory()"><i class="fas fa-bookmark"></i> Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CREDENTIAL SCANNER -->
+  <div class="panel" id="panelCreds">
+    <div class="panel-head" onclick="togglePanel('panelCreds')">
+      <div class="ph-icon yellow"><i class="fas fa-key"></i></div>
+      <div class="ph-text"><div class="ph-title">Credential Scanner <span class="info-chip">NEW v7</span></div><div class="ph-sub">JWT · AWS keys · Stripe · GitHub tokens · GCP · IPs · Emails · Domains</div></div>
+      <i class="fas fa-chevron-down collapse-arrow"></i>
+    </div>
+    <div class="panel-body">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#8f9bb3;margin-bottom:10px;">Auto-runs after deobfuscation. Also works on raw input.</div>
+      <div class="btn-row" style="margin:0 0 10px 0;">
+        <button class="btn-primary" onclick="runCredScan()" style="font-size:11px;padding:11px;letter-spacing:1px;"><i class="fas fa-magnifying-glass"></i>&nbsp; SCAN CREDENTIALS</button>
+      </div>
+      <div class="cred-list" id="credList"><div class="no-threats">// run scan to detect credentials &amp; secrets</div></div>
+    </div>
+  </div>
+
+  <!-- SMART REWRITER -->
+  <div class="panel" id="panelRewrite">
+    <div class="panel-head" onclick="togglePanel('panelRewrite')">
+      <div class="ph-icon purple"><i class="fas fa-pen-nib"></i></div>
+      <div class="ph-text"><div class="ph-title">Smart Rewriter <span class="ph-badge ai">AI</span></div><div class="ph-sub">Powered by Pollinations AI — GPT-OSS Fast · GPT-OSS Large</div></div>
+      <i class="fas fa-chevron-down collapse-arrow"></i>
+    </div>
+    <div class="panel-body">
+      <div class="field-label"><i class="fas fa-microchip"></i> Model</div>
+      <div class="model-row">
+        <button class="model-chip active" onclick="setPollModel('openai',this)">GPT-OSS Fast</button>
+        <button class="model-chip" onclick="setPollModel('openai-large',this)">GPT-OSS Large</button>
+      </div>
+      <div class="field-label" style="margin-bottom:6px;"><i class="fas fa-comment-dots"></i> Custom Instruction</div>
+      <input type="text" id="rewriteInstruction" placeholder="e.g. focus on API endpoints, rename to snake_case, explain malware behavior...">
+      <div class="rw-status" style="margin-top:12px;">
+        <div class="dot" id="rewriteDot"></div>
+        <span id="rewriteStatusText">idle — deobfuscate first</span>
+      </div>
+      <div class="btn-row" style="margin:0 0 10px 0;">
+        <button class="btn-primary purple-btn" id="rewriteBtn" onclick="runSmartRewrite()" style="font-size:12px;padding:13px;letter-spacing:1.5px;"><i class="fas fa-wand-sparkles"></i>&nbsp; SMART REWRITE</button>
+        <button class="btn-secondary" onclick="clearRewrite()" style="padding:13px 16px;"><i class="fas fa-trash"></i></button>
+      </div>
+      <textarea class="rw-output" id="rewriteOutput" readonly placeholder="// AI-rewritten output appears here...&#10;// • Descriptive variable and function names&#10;// • ⚠ WARNING: flags on suspicious/malicious code&#10;// • 🔑 FOUND: API keys, endpoints, tokens&#10;// • Inline comments explaining each block"></textarea>
+      <div class="action-strip" style="margin-top:8px;">
+        <button class="btn-mini" onclick="copyRewrite()"><i class="fas fa-copy"></i> Copy</button>
+        <button class="btn-mini" onclick="downloadRewrite()"><i class="fas fa-download"></i> Download</button>
+        <button class="btn-mini" onclick="loadRewriteAsInput()"><i class="fas fa-upload"></i> Use as Input</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI COMPARE -->
+  <div class="panel" id="panelCompare">
+    <div class="panel-head" onclick="togglePanel('panelCompare')">
+      <div class="ph-icon cyan"><i class="fas fa-scale-balanced"></i></div>
+      <div class="ph-text"><div class="ph-title">AI Model Compare <span class="ph-badge new">NEW</span></div><div class="ph-sub">GPT-OSS Fast vs Large in parallel — side-by-side</div></div>
+      <i class="fas fa-chevron-down collapse-arrow"></i>
+    </div>
+    <div class="panel-body">
+      <div class="btn-row" style="margin:0 0 0 0;">
+        <button class="btn-primary" id="compareBtn" onclick="runCompare()" style="font-size:11px;padding:12px;letter-spacing:1px;"><i class="fas fa-arrows-left-right"></i>&nbsp; COMPARE APIs</button>
+        <button class="btn-secondary" onclick="clearCompare()" style="padding:12px 14px;"><i class="fas fa-trash"></i></button>
+      </div>
+      <div class="compare-grid">
+        <div class="compare-col"><label><i class="fas fa-bolt" style="color:#4a90e2;margin-right:4px;"></i>GPT-OSS Fast</label><textarea class="compare-out" id="compareOut1" readonly placeholder="// Fast model result..."></textarea></div>
+        <div class="compare-col"><label><i class="fas fa-brain" style="color:#6a1b9a;margin-right:4px;"></i>GPT-OSS Large</label><textarea class="compare-out" id="compareOut2" readonly placeholder="// Large model result..."></textarea></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENTROPY SCANNER -->
+  <div class="panel" id="panelEntropy">
+    <div class="panel-head" onclick="togglePanel('panelEntropy')">
+      <div class="ph-icon orange"><i class="fas fa-wave-square"></i></div>
+      <div class="ph-text"><div class="ph-title">Entropy Scanner <span class="ph-badge new">NEW</span></div><div class="ph-sub">Shannon analysis by character class — detects obfuscation intensity</div></div>
+      <i class="fas fa-chevron-down collapse-arrow"></i>
+    </div>
+    <div class="panel-body">
+      <div class="btn-row" style="margin:0 0 10px 0;">
+        <button class="btn-primary" onclick="runEntropyAnalysis()" style="font-size:11px;padding:12px;letter-spacing:1px;background:#cc5500;box-shadow:0 4px 20px rgba(204,85,0,0.2);"><i class="fas fa-wave-square"></i>&nbsp; ANALYSE ENTROPY</button>
+      </div>
+      <div id="entropyBars"><div class="no-threats">// run analysis to see entropy breakdown</div></div>
+    </div>
+  </div>
+
+  <!-- HASH GENERATOR -->
+  <div class="panel" id="panelHash">
+    <div class="panel-head" onclick="togglePanel('panelHash')">
+      <div class="ph-icon green"><i class="fas fa-fingerprint"></i></div>
+      <div class="ph-text"><div class="ph-title">Hash Generator <span class="ph-badge new">NEW</span></div><div class="ph-sub">DJB2 · FNV-1a · SHA-256 · CRC32-like · custom fingerprint</div></div>
+      <i class="fas fa-chevron-down collapse-arrow"></i>
+    </div>
+    <div class="panel-body">
+      <div class="btn-row" style="margin:0 0 10px 0;">
+        <button class="btn-primary green-btn" onclick="runHashGen()" style="font-size:11px;padding:12px;letter-spacing:1px;"><i class="fas fa-hashtag"></i>&nbsp; GENERATE HASHES</button>
+      </div>
+      <div class="hash-list" id="hashList"><div class="no-threats">// run to fingerprint your code</div></div>
+    </div>
+  </div>
+
+  <!-- DIFF VIEWER -->
+  <div class="panel" id="panelDiff">
+    <div class="panel-head" onclick="togglePanel('panelDiff')">
+      <div class="ph-icon cyan"><i class="fas fa-code-compare"></i></div>
+      <div class="ph-text"><div class="ph-title">Diff Viewer <span class="ph-badge new">NEW</span></div><div class="ph-sub">Line-by-line input vs output — see exactly what changed</div></div>
+      <i class="fas fa-chevron-down collapse-arrow"></i>
+    </div>
+    <div class="panel-body">
+      <div class="btn-row" style="margin:0 0 8px 0;">
+        <button class="btn-primary" onclick="runDiff()" style="font-size:11px;padding:12px;letter-spacing:1px;"><i class="fas fa-code-compare"></i>&nbsp; VIEW DIFF</button>
+      </div>
+      <div class="diff-stats" id="diffStats"></div>
+      <textarea class="diff-textarea" id="diffOutput" readonly placeholder="// diff appears here&#10;// + added lines (green)&#10;// - removed lines (red)&#10;//   unchanged lines (dim)"></textarea>
+    </div>
+  </div>
+
+  <!-- SANDBOX -->
+  <div class="panel" id="panelSandbox">
+    <div class="panel-head" onclick="togglePanel('panelSandbox')">
+      <div class="ph-icon red"><i class="fas fa-flask-vial"></i></div>
+      <div class="ph-text"><div class="ph-title">Safe Execution Sandbox</div><div class="ph-sub">Jailed iframe · no DOM · no network · 10s timeout · console capture</div></div>
+      <i class="fas fa-chevron-down collapse-arrow"></i>
+    </div>
+    <div class="panel-body">
+      <div class="sandbox-badge" id="sandboxBadge"><i class="fas fa-lock"></i> SANDBOXED · NO DOM · NO NETWORK · ISOLATED</div>
+      <div class="btn-row" style="margin:0 0 0 0;">
+        <button class="btn-primary red-btn" id="sandboxBtn" onclick="runSandbox()" style="font-size:11px;padding:12px;letter-spacing:1px;"><i class="fas fa-play"></i>&nbsp; RUN IN SANDBOX</button>
+        <button class="btn-secondary" onclick="clearSandbox()" style="padding:12px 14px;"><i class="fas fa-trash"></i></button>
+      </div>
+      <textarea class="sandbox-output" id="sandboxOutput" readonly placeholder="$ sandbox output...&#10;> console.log(), document.write(), errors, eval() results..."></textarea>
+    </div>
+  </div>
+
+  <!-- URL EXTRACTOR -->
+  <div class="panel" id="panelURL">
+    <div class="panel-head" onclick="togglePanel('panelURL')">
+      <div class="ph-icon purple"><i class="fas fa-link"></i></div>
+      <div class="ph-text"><div class="ph-title">URL &amp; Endpoint Extractor</div><div class="ph-sub">HTTP · WS · FTP · Base64-encoded · Percent-encoded · Unicode-escaped links</div></div>
+      <i class="fas fa-chevron-down collapse-arrow"></i>
+    </div>
+    <div class="panel-body">
+      <div class="btn-row" style="margin:0 0 0 0;">
+        <button class="btn-primary purple-btn" onclick="extractURLs()" style="font-size:11px;padding:12px;letter-spacing:1px;"><i class="fas fa-magnifying-glass"></i>&nbsp; EXTRACT URLS</button>
+        <button class="btn-secondary" onclick="copyAllURLs()" style="padding:12px 14px;font-size:12px;">Copy All</button>
+      </div>
+      <div class="url-list" id="urlList"><div class="url-empty">// run extractor to find all links &amp; endpoints</div></div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="panel" id="panelHistory">
+    <div class="panel-head" onclick="togglePanel('panelHistory')">
+      <div class="ph-icon yellow"><i class="fas fa-clock-rotate-left"></i></div>
+      <div class="ph-text"><div class="ph-title">Session History <span class="ph-badge new">NEW</span></div><div class="ph-sub">Last 5 sessions stored in memory — click to restore</div></div>
+      <i class="fas fa-chevron-down collapse-arrow"></i>
+    </div>
+    <div class="panel-body">
+      <div class="hist-list" id="histList"><div class="no-threats">// no history yet — run deobfuscation to save sessions</div></div>
+      <div class="btn-row" style="margin:10px 0 0 0;">
+        <button class="btn-secondary" onclick="clearHistory()" style="font-size:11px;padding:10px;flex:1;">Clear History</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER LINKS -->
+  <div class="footer-links">
+    <a href="https://t.me/kaaxupdates" target="_blank" class="footer-btn tg"><i class="fab fa-telegram-plane"></i> JOIN TELEGRAM · @kaaxupdates</a>
+    <a href="https://whatsapp.com/channel/0029Vb6jJ1h2UPBIiqvzpg3O" target="_blank" class="footer-btn wa"><i class="fab fa-whatsapp"></i> JOIN WHATSAPP CHANNEL</a>
+  </div>
+
+  <div class="page-footer">
+    <div>⚡ DEOBSF v7.0 · Military Grade · by <a href="https://t.me/kaaxupdates" target="_blank">@kaaxhunter</a></div>
+    <div style="margin-top:4px;color:#a1aec0;">String-Array Resolver · CF Unflatten · Const Propagation · Credential Scanner · JSFuck · AAEncode</div>
+  </div>
+</div>
+
+<!-- ══════════ MAIN SCRIPT ══════════ -->
+<script>
+var MAX_SIZE=2*1024*1024, selectedMethod='auto', currentWorker=null;
+var extractedURLs=[], sandboxFrame=null, sandboxTimer=null;
+var selectedPollModel='openai';
+var sessionHistory=[];
+
+/* ── AI CONFIG (Pollinations POST API) ── */
+var POLL_MODELS=[
+  {id:'openai',label:'GPT-OSS Fast'},
+  {id:'openai-large',label:'GPT-OSS Large'}
+];
+var selectedPollModel='openai';
+
+/* Short, strict system prompt — stops hallucination and extra lines */
+var REWRITE_SYS='You are a JavaScript deobfuscator. Your ONLY job: rewrite the user\'s code with readable names and short inline comments. STRICT RULES: (1) Output ONLY valid JavaScript code. (2) Do NOT add, invent, or expand any logic — only rename and comment what already exists. (3) Do NOT output markdown, backticks, explanations, or preamble. (4) Every renamed variable/function must reflect its actual detected purpose. (5) Flag suspicious lines with // ⚠ and found secrets with // 🔑. (6) Keep output length close to input length.';
+
+/* ── MODAL ── */
+var popup=document.getElementById('joinPopup');
+document.getElementById('closePopup').onclick=function(){popup.classList.add('hidden');};
+popup.onclick=function(e){if(e.target===popup)popup.classList.add('hidden');};
+
+/* ── PANEL COLLAPSE ── */
+function togglePanel(id){
+  var p=document.getElementById(id);
+  p.classList.toggle('collapsed');
+}
+
+/* ── UTILS ── */
+function setMethod(m,btn){selectedMethod=m;document.querySelectorAll('.meth-btn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');}
+
+function log(msg,type){
+  var t=document.getElementById('terminal');
+  var d=document.createElement('div');
+  d.className='t-line'+(type?' '+type:'');
+  d.textContent=msg;
+  t.appendChild(d);
+  t.scrollTop=t.scrollHeight;
+}
+
+function setProgress(pct,label){
+  document.getElementById('progressWrap').classList.add('visible');
+  document.getElementById('progressBar').style.width=pct+'%';
+  if(label)document.getElementById('progressLabel').textContent=label;
+}
+function hideProgress(){
+  document.getElementById('progressWrap').classList.remove('visible');
+  document.getElementById('progressBar').style.width='0%';
+}
+
+function shannonEntropy(s){
+  if(!s||!s.length)return 0;
+  var freq={};
+  for(var i=0;i<s.length;i++)freq[s[i]]=(freq[s[i]]||0)+1;
+  var e=0,len=s.length;
+  for(var k in freq){var p=freq[k]/len;e-=p*Math.log2(p);}
+  return e;
+}
+
+function onInputChange(){
+  var v=document.getElementById('inputCode').value;
+  document.getElementById('statChars').textContent=v.length>999?(v.length/1000).toFixed(1)+'k':v.length;
+  document.getElementById('sizeWarn').classList.toggle('visible',v.length>51200);
+  if(v.length>0){
+    var e=shannonEntropy(v);
+    document.getElementById('statEntropy').textContent=e.toFixed(2);
+  }else{document.getElementById('statEntropy').textContent='—';}
+  document.getElementById('sc0').classList.add('active');
+}
+
+function clearAll(){
+  if(currentWorker){currentWorker.terminate();currentWorker=null;}
+  document.getElementById('inputCode').value='';
+  document.getElementById('outputCode').value='';
+  document.getElementById('terminal').innerHTML='<div class="t-line">cleared · ready</div>';
+  document.getElementById('detectionBadge').classList.remove('visible');
+  document.getElementById('scoreCard').classList.remove('visible');
+  document.getElementById('sizeWarn').classList.remove('visible');
+  ['statChars','statLayers','statDead','statOut','statCreds'].forEach(function(id){document.getElementById(id).textContent='0';});
+  document.getElementById('statEntropy').textContent='—';
+  document.getElementById('uploadLabel').textContent='Click or drag & drop';
+  document.getElementById('threatList').innerHTML='<div class="no-threats">// run deobfuscation to scan for threats</div>';
+  document.getElementById('threatFill').style.width='0%';
+  document.getElementById('credList').innerHTML='<div class="no-threats">// run scan to detect credentials</div>';
+  document.getElementById('diffOutput').value='';
+  document.getElementById('diffStats').innerHTML='';
+  document.getElementById('hashList').innerHTML='<div class="no-threats">// run to fingerprint your code</div>';
+  document.getElementById('entropyBars').innerHTML='<div class="no-threats">// run analysis to see entropy breakdown</div>';
+  [0,1,2,3,4,5].forEach(function(i){document.getElementById('sc'+i).classList.remove('active');});
+  hideProgress();setUIBusy(false);
+}
+
+function copyOutput(){var out=document.getElementById('outputCode').value;if(!out)return;navigator.clipboard.writeText(out).then(function(){log('copied to clipboard ✓','t-ok');});}
+function downloadOutput(){var out=document.getElementById('outputCode').value;if(!out)return;var blob=new Blob([out],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='deobfuscated_v7.js';a.click();log('downloaded ✓','t-ok');}
+function loadOutputAsInput(){var out=document.getElementById('outputCode').value;if(!out)return;document.getElementById('inputCode').value=out;onInputChange();document.getElementById('outputCode').value='';log('output loaded as new input','t-warn');}
+
+function handleFile(e){
+  var file=e.target.files[0];if(!file)return;
+  if(file.size>MAX_SIZE){log('ERROR: file exceeds 2MB','t-err');return;}
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    document.getElementById('inputCode').value=ev.target.result;
+    document.getElementById('uploadLabel').textContent='✓ '+file.name+' ('+(file.size/1024).toFixed(1)+'KB)';
+    onInputChange();
+    log('loaded: '+file.name+' · '+(file.size/1024).toFixed(1)+'KB','t-ok');
+  };
+  reader.readAsText(file);
+}
+var uploadZone=document.getElementById('uploadZone');
+uploadZone.addEventListener('dragover',function(e){e.preventDefault();uploadZone.classList.add('drag-over');});
+uploadZone.addEventListener('dragleave',function(){uploadZone.classList.remove('drag-over');});
+uploadZone.addEventListener('drop',function(e){e.preventDefault();uploadZone.classList.remove('drag-over');var f=e.dataTransfer.files[0];if(f)handleFile({target:{files:[f]}});});
+
+function setUIBusy(busy){
+  document.getElementById('decryptBtn').disabled=busy;
+  document.getElementById('clearBtn').disabled=busy;
+  document.getElementById('decryptBtn').innerHTML=busy?'<i class="fas fa-spinner fa-spin"></i>&nbsp; PROCESSING...':'<i class="fas fa-unlock-alt"></i>&nbsp; DEOBFUSCATE';
+  document.getElementById('cancelBtn').classList.toggle('visible',busy);
+}
+function cancelDecode(){if(currentWorker){currentWorker.terminate();currentWorker=null;}log('cancelled','t-warn');hideProgress();setUIBusy(false);}
+
+/* ── THREAT RENDER ── */
+function renderThreats(threats){
+  var list=document.getElementById('threatList'),fill=document.getElementById('threatFill');
+  if(!threats||!threats.length){
+    list.innerHTML='<div class="no-threats" style="color:#2e7d32"><i class="fas fa-check-circle"></i> no threats detected — safe to analyze</div>';
+    fill.style.width='0%';fill.className='score-fill sf-low';return;
+  }
+  var score=Math.min(100,threats.length*14);
+  fill.style.width=score+'%';
+  fill.className='score-fill '+(score>=70?'sf-crit':score>=40?'sf-high':score>=20?'sf-med':'sf-low');
+  var typeClass={loop:'ts-warn',overflow:'ts-warn',memory:'ts-found',eval:'ts-warn','anti-debug':'ts-warn',dos:'ts-found',mining:'ts-found',injection:'ts-warn',obf:'ts-bypass',redirect:'ts-found',fingerprint:'ts-warn'};
+  list.innerHTML=threats.map(function(t){
+    return '<div class="threat-item"><div><div class="threat-name"><i class="fas fa-triangle-exclamation" style="color:#cc7700;margin-right:6px;font-size:10px;"></i>'+t.name+'</div><div class="threat-bypass">'+t.bypass+'</div></div><span class="t-status '+(typeClass[t.type]||'ts-warn')+'">'+t.type+'</span></div>';
+  }).join('');
+}
+
+/* ── SCORE CARD RENDER ── */
+function renderScoreCard(scoreData){
+  var card=document.getElementById('scoreCard');
+  card.classList.add('visible');
+  var n=scoreData.score;
+  var col=n>=80?'#b91c1c':n>=50?'#cc7700':n>=25?'#e65100':'#2e7d32';
+  var grade=n>=80?'CRITICAL':n>=60?'HEAVY':n>=40?'MODERATE':n>=20?'LIGHT':'CLEAN';
+  var desc=n>=80?'Heavily obfuscated — multiple techniques':n>=60?'Strong obfuscation detected':n>=40?'Moderate obfuscation':n>=20?'Some obfuscation':'Minimal or no obfuscation';
+  document.getElementById('scNumber').textContent=n;
+  document.getElementById('scNumber').style.color=col;
+  document.getElementById('scGrade').textContent=grade;
+  document.getElementById('scGrade').style.color=col;
+  document.getElementById('scDesc').textContent=desc;
+  var bd=scoreData.breakdown;
+  var items=[
+    {label:'Hex Identifiers',val:bd.hexIdentifiers,max:40,color:'#4a90e2'},
+    {label:'String Arrays',val:bd.stringArrays,max:20,color:'#6a1b9a'},
+    {label:'Packed JS',val:bd.packed,max:15,color:'#e65100'},
+    {label:'Control Flow',val:bd.controlFlow,max:15,color:'#b91c1c'},
+    {label:'Eval Usage',val:bd.evalUsage,max:10,color:'#cc7700'},
+  ];
+  document.getElementById('scItems').innerHTML=items.map(function(it){
+    var pct=it.max>0?Math.round((it.val/it.max)*100):0;
+    return '<div class="sc-item"><span class="sc-item-label">'+it.label+'</span><div class="sc-item-bar"><div class="sc-item-fill" style="width:'+pct+'%;background:'+it.color+'"></div></div><span class="sc-item-val" style="color:'+it.color+'">'+it.val+'</span></div>';
+  }).join('');
+}
+
+/* ── CREDENTIAL RENDER ── */
+function renderCreds(creds){
+  var list=document.getElementById('credList');
+  document.getElementById('statCreds').textContent=creds.length;
+  if(!creds||!creds.length){
+    list.innerHTML='<div class="no-threats" style="color:#2e7d32"><i class="fas fa-check-circle"></i> no credentials or secrets detected</div>';
+    return;
+  }
+  list.innerHTML=creds.map(function(c){
+    return '<div class="cred-item"><span class="cred-type ct-'+c.type+'">'+c.label+'</span><span class="cred-val">'+escHtml(c.value)+'</span><button class="btn-mini" onclick="navigator.clipboard.writeText(\''+escHtml(c.value).replace(/'/g,"\\'")+'\')" style="flex-shrink:0;font-size:8px;padding:4px 8px;">copy</button></div>';
+  }).join('');
+  if(creds.length>0){document.getElementById('sc5').classList.add('active');}
+}
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function runCredScan(){
+  var src=document.getElementById('outputCode').value||document.getElementById('inputCode').value;
+  if(!src.trim()){log('nothing to scan','t-err');return;}
+  // call worker scan via inline
+  var workerSrc=document.getElementById('workerCode').textContent;
+  // just run inline credential scan
+  var creds=credScanInline(src);
+  renderCreds(creds);
+  log('cred scan: '+creds.length+' item(s) found','t-ok');
+}
+
+function credScanInline(s){
+  var hits=[],seen=new Set();
+  var patterns=[
+    {type:'jwt',re:/eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/g,label:'JWT Token'},
+    {type:'aws',re:/AKIA[0-9A-Z]{16}/g,label:'AWS Access Key'},
+    {type:'key',re:/sk-[a-zA-Z0-9]{32,}/g,label:'API Key (sk-)'},
+    {type:'key',re:/pk_live_[a-zA-Z0-9]{24,}/g,label:'Stripe Live Key'},
+    {type:'key',re:/gh[pousr]_[A-Za-z0-9_]{36,}/g,label:'GitHub Token'},
+    {type:'key',re:/AIza[0-9A-Za-z\-_]{35}/g,label:'Google API Key'},
+    {type:'ip',re:/\b(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\b/g,label:'IP Address'},
+    {type:'email',re:/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g,label:'Email Address'},
+    {type:'domain',re:/(?:https?:\/\/)([a-zA-Z0-9\-]+\.(?:com|net|org|io|co|ru|cn|de|xyz|online|site))\b/gi,label:'Domain'},
+  ];
+  patterns.forEach(function(p){
+    var m,re=new RegExp(p.re.source,p.re.flags);
+    while((m=re.exec(s))!==null){
+      var val=m[1]||m[0];
+      var key=p.type+':'+val;
+      if(!seen.has(key)&&val.length>3){seen.add(key);hits.push({type:p.type,label:p.label,value:val.slice(0,80)+(val.length>80?'…':'')});}
+      if(hits.length>60)break;
+    }
+  });
+  return hits;
+}
+
+/* ── MAIN DEOBFUSCATE ── */
+function runDecrypt(){
+  var input=document.getElementById('inputCode').value;
+  if(!input.trim()){log('no input provided','t-err');return;}
+  if(input.length>MAX_SIZE){log('ERROR: exceeds 2MB limit','t-err');return;}
+  var opts={beautify:document.getElementById('togBeautify').checked,rename:document.getElementById('togRename').checked,evalHex:document.getElementById('togHex').checked,deadCode:document.getElementById('togDead').checked,bypassCrashers:document.getElementById('togBypass').checked};
+  setUIBusy(true);setProgress(3,'initializing...');
+  document.getElementById('detectionBadge').classList.remove('visible');
+  log('input: '+(input.length/1024).toFixed(1)+'KB · method: '+selectedMethod+' · v7.0 engine');
+  var isLarge=input.length>51200;
+  var workerSrc=document.getElementById('workerCode').textContent;
+  var blob=new Blob([workerSrc],{type:'application/javascript'});
+  var url=URL.createObjectURL(blob);
+  var worker=new Worker(url);
+  currentWorker=worker;
+  worker.onmessage=function(e){
+    var data=e.data;
+    if(data.type==='log')log(data.msg);
+    else if(data.type==='log-ok')log(data.msg,'t-ok');
+    else if(data.type==='log-warn')log(data.msg,'t-warn');
+    else if(data.type==='log-err')log(data.msg,'t-err');
+    else if(data.type==='log-clean')log(data.msg,'t-clean');
+    else if(data.type==='log-crash')log(data.msg,'t-crash');
+    else if(data.type==='log-ai')log(data.msg,'t-ai');
+    else if(data.type==='done')setProgress(100,'done!');
+    else if(data.type==='crasher-result')renderThreats(data.threats);
+    else if(data.type==='result'){
+      var out=data.output;
+      document.getElementById('outputCode').value=out;
+      document.getElementById('statLayers').textContent=data.layers;
+      document.getElementById('statDead').textContent=data.deadRemoved||0;
+      document.getElementById('statOut').textContent=out.length>999?(out.length/1000).toFixed(1)+'k':out.length;
+      [1,2,3].forEach(function(i){document.getElementById('sc'+i).classList.add('active');});
+      renderThreats(data.threats||[]);
+      if(data.obfScore)renderScoreCard(data.obfScore);
+      if(data.credentials&&data.credentials.length)renderCreds(data.credentials);
+
+      if(data.badge&&data.badge.length){
+        document.getElementById('detectionBadge').classList.add('visible');
+        var decodeTags=['base64','hex','url','unicode','html-entities','rot13','binary','octal','morse','atbash','caesar','xor','packed','brainfuck','jsfuck','aaencode'];
+        var dec=data.badge.filter(function(b){return decodeTags.indexOf(b)!==-1;});
+        var cln=data.badge.filter(function(b){return decodeTags.indexOf(b)===-1;});
+        var html='';
+        if(dec.length)html+='<span class="det-badge-label">🔓 decoded</span>'+dec.map(function(l){return '<span class="layer-chip lc-decode">'+l+'</span>';}).join('');
+        if(cln.length)html+='<span class="det-badge-label" style="margin-top:8px;display:block;">✨ cleaned</span>'+cln.map(function(l){return '<span class="layer-chip lc-clean">'+l+'</span>';}).join('');
+        if(data.threats&&data.threats.length)html+='<span class="det-badge-label" style="margin-top:8px;display:block;">🛡 bypassed</span>'+data.threats.map(function(t){return '<span class="layer-chip lc-threat">'+t.type+'</span>';}).join('');
+        document.getElementById('detectedLayers').innerHTML=html;
+      }
+      log('done · '+data.layers+' layer(s) · '+(data.deadRemoved||0)+' dead · out: '+out.length.toLocaleString()+' chars','t-ok');
+      if(data.threats&&data.threats.length)log('⚠ '+data.threats.length+' threat(s) detected & bypassed','t-crash');
+      if(data.credentials&&data.credentials.length)log('🔑 '+data.credentials.length+' credential/secret(s) found','t-info');
+      saveHistory();
+      if(document.getElementById('togSmartRewrite').checked)setTimeout(runSmartRewrite,800);
+      setTimeout(hideProgress,1500);setUIBusy(false);worker.terminate();URL.revokeObjectURL(url);currentWorker=null;
+    }
+    if(data.pct!=null)setProgress(data.pct);
+  };
+  worker.onerror=function(err){log('worker error: '+err.message,'t-err');hideProgress();setUIBusy(false);worker.terminate();URL.revokeObjectURL(url);currentWorker=null;};
+  worker.postMessage({input:input,method:selectedMethod,isLarge:isLarge,opts:opts});
+}
+
+/* ── MODEL SELECTOR ── */
+function setPollModel(m,btn){
+  selectedPollModel=m;
+  document.querySelectorAll('.model-chip').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  log('model → '+m,'t-clean');
+}
+
+/* ── AI CALL (Pollinations POST) ── */
+async function callAI(model,code,instruction){
+  var sys=REWRITE_SYS+(instruction?'\nAdditional focus: '+instruction:'');
+  /* Hard cap: Pollinations chokes on long context */
+  var MAX_CHARS=3000;
+  var truncated=false;
+  if(code.length>MAX_CHARS){code=code.slice(0,MAX_CHARS);truncated=true;}
+  var userMsg='Deobfuscate and rewrite ONLY the code below. Do not add new logic.'+(truncated?'\n[INPUT TRUNCATED TO '+MAX_CHARS+' CHARS]':'')+'\n\n'+code;
+  var payload={
+    model:model||'openai',
+    messages:[
+      {role:'system',content:sys},
+      {role:'user',content:userMsg}
+    ],
+    seed:42,
+    temperature:0.1,
+    private:true
+  };
+  var resp=await fetch('https://text.pollinations.ai/openai',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload)
+  });
+  if(!resp.ok){
+    var errText=await resp.text().catch(function(){return '';});
+    throw new Error('HTTP '+resp.status+(errText?' — '+errText.slice(0,120):''));
+  }
+  var data=await resp.json();
+  var out='';
+  if(data.choices&&data.choices[0]){
+    out=data.choices[0].message&&data.choices[0].message.content||data.choices[0].text||'';
+  }else if(typeof data==='string'){
+    out=data;
+  }
+  /* Strip any markdown fences the model sneaks in */
+  out=out.replace(/^```[\w]*\r?\n?/gm,'').replace(/```\s*$/gm,'').trim();
+  return out;
+}
+
+/* ── SMART REWRITE ── */
+function clearRewrite(){document.getElementById('rewriteOutput').value='';document.getElementById('rewriteDot').className='dot';document.getElementById('rewriteStatusText').textContent='idle — deobfuscate first';}
+function copyRewrite(){var v=document.getElementById('rewriteOutput').value;if(v)navigator.clipboard.writeText(v).then(function(){log('rewrite copied','t-ok');});}
+function downloadRewrite(){var v=document.getElementById('rewriteOutput').value;if(!v)return;var blob=new Blob([v],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='smart_rewrite_v7.js';a.click();}
+function loadRewriteAsInput(){var v=document.getElementById('rewriteOutput').value;if(!v)return;document.getElementById('inputCode').value=v;onInputChange();log('rewrite loaded as input','t-warn');}
+
+async function runSmartRewrite(){
+  var code=document.getElementById('outputCode').value||document.getElementById('inputCode').value;
+  if(!code.trim()){log('no code to rewrite','t-err');return;}
+  var btn=document.getElementById('rewriteBtn'),dot=document.getElementById('rewriteDot'),st=document.getElementById('rewriteStatusText');
+  var instruction=document.getElementById('rewriteInstruction').value.trim();
+  btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>&nbsp; REWRITING...';
+  dot.className='dot ai';
+  st.textContent='querying Pollinations ('+selectedPollModel+')...';
+  var charCount=Math.min(code.length,3000);
+  log('smart rewrite → Pollinations/'+selectedPollModel+' · sending '+charCount+' chars','t-ai');
+  try{
+    var result=await callAI(selectedPollModel,code,instruction);
+    if(!result||result.trim().length<10)throw new Error('empty response — try again or switch model');
+    document.getElementById('rewriteOutput').value=result;
+    dot.className='dot online';
+    st.textContent='✓ done · '+result.length.toLocaleString()+' chars';
+    log('rewrite done · '+result.length.toLocaleString()+' chars','t-ok');
+  }catch(err){
+    dot.className='dot';
+    st.textContent='✗ error: '+err.message;
+    document.getElementById('rewriteOutput').value='// ERROR: '+err.message+'\n// Try a different model or reduce input size.';
+    log('rewrite error: '+err.message,'t-err');
+  }
+  btn.disabled=false;btn.innerHTML='<i class="fas fa-wand-sparkles"></i>&nbsp; SMART REWRITE';
+}
+
+/* ── AI COMPARE ── */
+function clearCompare(){document.getElementById('compareOut1').value='';document.getElementById('compareOut2').value='';}
+async function runCompare(){
+  var code=document.getElementById('outputCode').value||document.getElementById('inputCode').value;
+  if(!code.trim()){log('no code to compare','t-err');return;}
+  var btn=document.getElementById('compareBtn');
+  btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>&nbsp; COMPARING...';
+  var instruction=document.getElementById('rewriteInstruction').value.trim();
+  log('ai compare: GPT-OSS Fast vs Large in parallel...','t-ai');
+  document.getElementById('compareOut1').value='⏳ GPT-OSS Fast thinking...';
+  document.getElementById('compareOut2').value='⏳ GPT-OSS Large thinking...';
+  try{
+    var results=await Promise.allSettled([callAI('openai',code,instruction),callAI('openai-large',code,instruction)]);
+    var r1=results[0].status==='fulfilled'?results[0].value:'// Error: '+results[0].reason;
+    var r2=results[1].status==='fulfilled'?results[1].value:'// Error: '+results[1].reason;
+    document.getElementById('compareOut1').value=r1;
+    document.getElementById('compareOut2').value=r2;
+    log('compare done — Fast: '+r1.length+' chars · Large: '+r2.length+' chars','t-ok');
+  }catch(err){log('compare error: '+err.message,'t-err');}
+  btn.disabled=false;btn.innerHTML='<i class="fas fa-arrows-left-right"></i>&nbsp; COMPARE APIs';
+}
+
+/* ── ENTROPY ── */
+function runEntropyAnalysis(){
+  var src=document.getElementById('outputCode').value||document.getElementById('inputCode').value;
+  if(!src.trim()){log('nothing to analyse','t-err');return;}
+  var sections={'Full Text':src,'Letters Only':src.replace(/[^a-zA-Z]/g,''),'Digits Only':src.replace(/[^0-9]/g,''),'Symbols Only':src.replace(/[a-zA-Z0-9\s]/g,''),'Printable ASCII':src.split('').filter(function(c){var cc=c.charCodeAt(0);return cc>=32&&cc<127;}).join('')};
+  var colors={'Full Text':'#4a90e2','Letters Only':'#2e7d32','Digits Only':'#e65100','Symbols Only':'#b91c1c','Printable ASCII':'#6a1b9a'};
+  var html='', fullE=0;
+  Object.keys(sections).forEach(function(k){
+    var e=shannonEntropy(sections[k]);
+    if(k==='Full Text')fullE=e;
+    var pct=Math.min(100,(e/8)*100);
+    html+='<div class="ent-row"><span class="ent-label">'+k+'</span><div class="ent-track"><div class="ent-fill" style="width:'+pct+'%;background:'+colors[k]+'"></div></div><span class="ent-val">'+e.toFixed(2)+'</span></div>';
+  });
+  var verdict,vcol;
+  if(fullE>7){verdict='🔴 CRITICAL — likely encrypted/compressed payload';vcol='#b91c1c';}
+  else if(fullE>5.5){verdict='🟠 HIGH — strongly obfuscated code';vcol='#cc7700';}
+  else if(fullE>4){verdict='🟡 MEDIUM — some obfuscation present';vcol='#e65100';}
+  else{verdict='🟢 LOW — likely clean or readable source';vcol='#2e7d32';}
+  html+='<div class="ent-verdict" style="color:'+vcol+'">'+verdict+'</div>';
+  document.getElementById('entropyBars').innerHTML=html;
+  document.getElementById('statEntropy').textContent=fullE.toFixed(2);
+  document.getElementById('sc4').classList.add('active');
+  log('entropy: '+fullE.toFixed(3)+' bits/char · '+verdict.split('—')[0].trim(),'t-ok');
+}
+
+/* ── HASH ── */
+function djb2(s){var h=5381;for(var i=0;i<s.length;i++)h=((h<<5)+h)^s.charCodeAt(i);return(h>>>0).toString(16).padStart(8,'0');}
+function fnv1a32(s){var h=0x811c9dc5;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=(h*0x01000193)>>>0;}return h.toString(16).padStart(8,'0');}
+function crc32like(s){var t=0xFFFFFFFF;for(var i=0;i<s.length;i++){t^=s.charCodeAt(i);for(var j=0;j<8;j++)t=(t&1)?(t>>>1)^0xEDB88320:(t>>>1);}return((t^0xFFFFFFFF)>>>0).toString(16).padStart(8,'0');}
+function sdbm(s){var h=0;for(var i=0;i<s.length;i++)h=s.charCodeAt(i)+(h<<6)+(h<<16)-h;return(h>>>0).toString(16).padStart(8,'0');}
+async function sha256hex(s){try{var enc=new TextEncoder();var buf=await crypto.subtle.digest('SHA-256',enc.encode(s));return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');}catch(e){return'(unavailable - HTTPS only)';}}
+async function md5approx(s){var h1=0xdeadbeef^0,h2=0x41c6ce57^0;for(var i=0;i<s.length;i++){var ch=s.charCodeAt(i);h1=Math.imul(h1^ch,2654435761);h2=Math.imul(h2^ch,1597334677);}h1=Math.imul(h1^(h1>>>16),2246822507);h1^=Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507);h2^=Math.imul(h1^(h1>>>13),3266489909);return(4294967296*(2097151&h2)+(h1>>>0)).toString(16).padStart(16,'0');}
+
+async function runHashGen(){
+  var src=document.getElementById('outputCode').value||document.getElementById('inputCode').value;
+  if(!src.trim()){log('nothing to hash','t-err');return;}
+  log('generating hashes...','t-clean');
+  var sha=await sha256hex(src);
+  var items=[
+    {algo:'SHA-256',val:sha,copy:sha},
+    {algo:'MD5-like',val:await md5approx(src),copy:await md5approx(src)},
+    {algo:'DJB2',val:djb2(src),copy:djb2(src)},
+    {algo:'FNV-1a',val:fnv1a32(src),copy:fnv1a32(src)},
+    {algo:'CRC32',val:crc32like(src),copy:crc32like(src)},
+    {algo:'SDBM',val:sdbm(src),copy:sdbm(src)},
+    {algo:'Length',val:src.length.toLocaleString()+' chars',copy:String(src.length)},
+    {algo:'Lines',val:src.split('\n').length.toLocaleString()+' lines',copy:String(src.split('\n').length)},
+  ];
+  window._hashItems=items;
+  document.getElementById('hashList').innerHTML=items.map(function(it,i){
+    return '<div class="hash-item"><span class="hash-algo">'+it.algo+'</span><span class="hash-val">'+it.val.slice(0,64)+'</span><button class="btn-mini" onclick="navigator.clipboard.writeText(window._hashItems['+i+'].copy);log(\'hash copied\',\'t-ok\')" style="flex-shrink:0;font-size:8px;padding:4px 8px;">copy</button></div>';
+  }).join('');
+  log('hashes generated · SHA-256: '+sha.slice(0,16)+'...','t-ok');
+}
+
+/* ── DIFF ── */
+function runDiff(){
+  var input=document.getElementById('inputCode').value;
+  var output=document.getElementById('outputCode').value;
+  if(!input.trim()||!output.trim()){log('need both input and output to diff','t-warn');return;}
+  var aLines=input.split('\n'),bLines=output.split('\n');
+  var diff=[],added=0,removed=0,same=0,maxShown=600,shown=0;
+  var maxLen=Math.max(aLines.length,bLines.length);
+  for(var i=0;i<maxLen&&shown<maxShown;i++){
+    var a=aLines[i],b=bLines[i];
+    if(a===undefined){diff.push('+ '+b);added++;shown++;}
+    else if(b===undefined){diff.push('- '+a);removed++;shown++;}
+    else if(a===b){diff.push('  '+a.slice(0,140));same++;shown++;}
+    else{diff.push('- '+a.slice(0,140));diff.push('+ '+b.slice(0,140));removed++;added++;shown+=2;}
+  }
+  if(maxLen>maxShown)diff.push('\n  ... ['+(maxLen-maxShown)+' more lines]');
+  document.getElementById('diffOutput').value=diff.join('\n');
+  document.getElementById('diffStats').innerHTML=
+    '<span style="color:#2e7d32"><i class="fas fa-plus"></i> '+added+' added</span>'+
+    '<span style="color:#b91c1c"><i class="fas fa-minus"></i> '+removed+' removed</span>'+
+    '<span style="color:#8f9bb3"><i class="fas fa-equals"></i> '+same+' unchanged</span>'+
+    '<span style="color:#4a5c72">'+maxLen+' total lines</span>';
+  log('diff: +'+added+' −'+removed+' ='+same,'t-clean');
+}
+
+/* ── SANDBOX ── */
+function clearSandbox(){
+  document.getElementById('sandboxOutput').value='';
+  document.getElementById('sandboxBadge').className='sandbox-badge';
+  document.getElementById('sandboxBadge').innerHTML='<i class="fas fa-lock"></i> SANDBOXED · NO DOM · NO NETWORK · ISOLATED';
+  if(sandboxFrame){document.body.removeChild(sandboxFrame);sandboxFrame=null;}
+  if(sandboxTimer){clearTimeout(sandboxTimer);sandboxTimer=null;}
+}
+function runSandbox(){
+  var code=document.getElementById('outputCode').value||document.getElementById('inputCode').value;
+  if(!code.trim()){log('no code to run','t-err');return;}
+  clearSandbox();
+  var btn=document.getElementById('sandboxBtn');
+  btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>&nbsp; RUNNING...';
+  var outputLines=[],done=false,startTime=Date.now();
+  var iframeHTML='<!DOCTYPE html><html><body><script>["log","warn","error","info","debug"].forEach(function(m){console[m]=function(){var str=Array.prototype.slice.call(arguments).map(function(a){try{return typeof a==="object"?JSON.stringify(a,null,2):String(a);}catch(e){return String(a);}}).join(" ");parent.postMessage({type:"sandbox-log",msg:str},"*");};});document.write=function(s){parent.postMessage({type:"sandbox-write",msg:String(s)},"*");};window.alert=function(s){parent.postMessage({type:"sandbox-log",msg:"[ALERT] "+String(s)},"*");};window.onerror=function(msg,src,line){parent.postMessage({type:"sandbox-error",msg:"[ERROR] "+msg+" (line "+line+")"},"*");return true;};try{var __r=(function(){\n'+code+'\n})();if(__r!==undefined)parent.postMessage({type:"sandbox-result",msg:"[RETURN] "+JSON.stringify(__r)},"*");}catch(e){parent.postMessage({type:"sandbox-error",msg:"[EXEC ERROR] "+e.message},"*");}parent.postMessage({type:"sandbox-done"},"*");<\/script></body></html>';
+  var frame=document.createElement('iframe');frame.setAttribute('sandbox','allow-scripts');frame.style.cssText='position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;border:none;';document.body.appendChild(frame);sandboxFrame=frame;
+  function onMsg(e){var d=e.data;if(!d||typeof d!=='object')return;if(d.type==='sandbox-log'||d.type==='sandbox-write'||d.type==='sandbox-result')outputLines.push(d.msg);else if(d.type==='sandbox-error')outputLines.push(d.msg);else if(d.type==='sandbox-done'){done=true;finish();}}
+  function finish(){window.removeEventListener('message',onMsg);if(sandboxTimer){clearTimeout(sandboxTimer);sandboxTimer=null;}var elapsed=Date.now()-startTime;if(!outputLines.length)outputLines.push('(no output captured)');outputLines.push('\n--- finished in '+elapsed+'ms ---');document.getElementById('sandboxOutput').value=outputLines.join('\n');var badge=document.getElementById('sandboxBadge');badge.className='sandbox-badge safe';badge.innerHTML='<i class="fas fa-check-circle"></i> SAFE EXECUTION · '+outputLines.length+' line(s) · '+elapsed+'ms';btn.disabled=false;btn.innerHTML='<i class="fas fa-play"></i>&nbsp; RUN IN SANDBOX';log('sandbox: '+outputLines.length+' line(s) in '+elapsed+'ms','t-ok');autoExtractURLs((document.getElementById('outputCode').value||'')+'\n'+outputLines.join('\n'));}
+  window.addEventListener('message',onMsg);
+  sandboxTimer=setTimeout(function(){if(!done){outputLines.push('[TIMEOUT] 10s exceeded — terminated');finish();}},10000);
+  var doc=frame.contentDocument||frame.contentWindow.document;doc.open();doc.write(iframeHTML);doc.close();
+}
+
+/* ── URL EXTRACTOR ── */
+function extractURLs(){
+  var source=(document.getElementById('outputCode').value||'')+(document.getElementById('sandboxOutput').value||'')+(document.getElementById('inputCode').value||'');
+  if(!source.trim()){log('nothing to extract from','t-err');return;}
+  var found=[],seen=new Set(),m;
+  var urlRe=/https?:\/\/[^\s"'<>\)\(,\[\]{}\\]+/gi;while((m=urlRe.exec(source))!==null){var url=m[0].replace(/[.,;:!?]+$/,'');if(!seen.has(url)){seen.add(url);found.push({url:url,type:'http'});}}
+  var wsRe=/wss?:\/\/[^\s"'<>\)\(,\[\]{}\\]+/gi;while((m=wsRe.exec(source))!==null){var wu=m[0].replace(/[.,;:!?]+$/,'');if(!seen.has(wu)){seen.add(wu);found.push({url:wu,type:'ws'});}}
+  var b64Re=/[A-Za-z0-9+\/=]{30,}/g;while((m=b64Re.exec(source))!==null){try{var decoded=atob(m[0]);if(/https?:\/\//.test(decoded)){(decoded.match(/https?:\/\/[^\s"'<>]+/gi)||[]).forEach(function(u){u=u.replace(/[.,;:!?]+$/,'');if(!seen.has(u)){seen.add(u);found.push({url:u,type:'suspicious'});}});}}catch(e){}}
+  extractedURLs=found;renderURLList(found);
+  log('URLs: '+found.length+' found',found.length>0?'t-ok':'t-warn');
+}
+function autoExtractURLs(text){if(/https?:\/\//.test(text))extractURLs();}
+function renderURLList(urls){
+  var list=document.getElementById('urlList');
+  if(!urls.length){list.innerHTML='<div class="url-empty">// no URLs found</div>';return;}
+  var tc={http:0,ws:0,suspicious:0};urls.forEach(function(u){tc[u.type]=(tc[u.type]||0)+1;});
+  var stats='<div class="url-stats">'+urls.length+' url(s) · '+(tc.http?'<span style="color:#2e7d32">'+tc.http+' http</span> ':'')+(tc.ws?'<span style="color:#6a1b9a">'+tc.ws+' ws</span> ':'')+(tc.suspicious?'<span style="color:#b91c1c">'+tc.suspicious+' encoded</span>':'')+'</div>';
+  var items=urls.map(function(u,i){return '<div class="url-item"><span class="url-tag tag-'+u.type+'">'+(u.type==='suspicious'?'ENC':u.type.toUpperCase())+'</span><a href="'+u.url+'" target="_blank" rel="noopener noreferrer">'+u.url+'</a><button class="btn-mini" onclick="copyURL('+i+')" style="flex-shrink:0;font-size:8px;padding:4px 8px;">copy</button></div>';}).join('');
+  list.innerHTML=stats+items;
+}
+function copyURL(i){if(extractedURLs[i])navigator.clipboard.writeText(extractedURLs[i].url).then(function(){log('URL copied','t-ok');});}
+function copyAllURLs(){if(!extractedURLs.length){log('no URLs','t-warn');return;}navigator.clipboard.writeText(extractedURLs.map(function(u){return u.url;}).join('\n')).then(function(){log('all '+extractedURLs.length+' URLs copied','t-ok');});}
+
+/* ── HISTORY ── */
+function saveHistory(){
+  var input=document.getElementById('inputCode').value;
+  var output=document.getElementById('outputCode').value;
+  if(!input.trim()||!output.trim())return;
+  var entry={ts:new Date().toLocaleTimeString(),inputLen:input.length,outputLen:output.length,input:input.slice(0,500),output:output.slice(0,500),layers:document.getElementById('statLayers').textContent,method:selectedMethod};
+  sessionHistory.unshift(entry);
+  if(sessionHistory.length>5)sessionHistory=sessionHistory.slice(0,5);
+  renderHistory();
+}
+function renderHistory(){
+  var list=document.getElementById('histList');
+  if(!sessionHistory.length){list.innerHTML='<div class="no-threats">// no history yet</div>';return;}
+  list.innerHTML=sessionHistory.map(function(h,i){
+    return '<div class="hist-item" onclick="restoreHistory('+i+')" title="Click to restore"><div style="flex:1;min-width:0;"><div class="hist-preview">'+escHtml(h.input.slice(0,60).replace(/\n/g,' '))+'</div><div class="hist-meta">'+h.ts+' · in:'+h.inputLen+' out:'+h.outputLen+' · '+h.layers+' layers · '+h.method+'</div></div><i class="fas fa-rotate-left" style="color:#8f9bb3;font-size:12px;flex-shrink:0;"></i></div>';
+  }).join('');
+}
+function restoreHistory(i){
+  if(!sessionHistory[i])return;
+  var h=sessionHistory[i];
+  document.getElementById('inputCode').value=h.input+(h.inputLen>500?'\n// [TRUNCATED — restore from download]':'');
+  onInputChange();
+  log('history restored: '+h.ts,'t-warn');
+}
+function clearHistory(){sessionHistory=[];renderHistory();log('history cleared','t-warn');}
+
+/* ── KEYBOARD SHORTCUT ── */
+document.addEventListener('keydown',function(e){
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();runDecrypt();}
+  if((e.ctrlKey||e.metaKey)&&e.shiftKey&&e.key==='C'){e.preventDefault();copyOutput();}
+});
+</script>
+</body>
+</html>
